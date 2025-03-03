@@ -29,11 +29,11 @@ public class Plugin : Plugin<Config>
         Directory.CreateDirectory(Path.Combine(Paths.IndividualConfigs, Prefix));
 
         AdminRepository = new AdminRepository(
-            Path.Combine(Paths.IndividualConfigs, Prefix, "admins.json"));
+            Path.Combine(Paths.IndividualConfigs, Prefix, $"{Core.Plugin.ServerName}_admins.json"));
         AdminRepository.Load();
 
         _adminNormChecker = new AdminNormChecker(
-            Path.Combine(Paths.IndividualConfigs, Prefix, "admins_norm.json"));
+            Path.Combine(Paths.IndividualConfigs, Prefix, $"{Core.Plugin.ServerName}_admins_norm.json"));
         _adminNormChecker.CheckAndSendWebhook();
 
         Player.Register();

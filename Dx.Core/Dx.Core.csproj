@@ -144,6 +144,7 @@
         <Compile Include="API\Extensions\PlayerExtensions.cs" />
         <Compile Include="API\Extensions\StringExtensions.cs" />
         <Compile Include="API\Extensions\WebhookExtensions.cs" />
+        <Compile Include="API\Features\CassieMessage.cs" />
         <Compile Include="API\Features\Commands\CommandBase.cs" />
         <Compile Include="API\Features\Commands\CommandContext.cs" />
         <Compile Include="API\Features\Commands\CommandParameter.cs" />

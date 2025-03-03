@@ -5,7 +5,6 @@ using Exiled.Events.EventArgs.Player;
 using Mirror;
 using UnityEngine;
 using EventTarget = Exiled.Events.Handlers.Player;
-using Light = Exiled.API.Features.Toys.Light;
 
 namespace Dx.NoRules.API.Features.ShootingEffects.Events.Internal
 {

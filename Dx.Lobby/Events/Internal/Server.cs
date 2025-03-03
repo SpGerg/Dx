@@ -4,6 +4,7 @@ using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Doors;
+using HintServiceMeow.Core.Utilities;
 using MapEditorReborn.API.Features;
 using MapEditorReborn.API.Features.Serializable;
 using MEC;
@@ -32,7 +33,7 @@ namespace Dx.Lobby.Events.Internal
 
         private static void SpawnSchematicOnWaitingForPlayers()
         {
-            var schematicInfo = Plugin.Instance.Config.Schematics.GetRandomValue();
+            var schematicInfo = Plugin.Config.Schematics.GetRandomValue();
             
             Plugin.SelectedSchematic = schematicInfo;
             
@@ -58,10 +59,22 @@ namespace Dx.Lobby.Events.Internal
             foreach (var player in Exiled.API.Features.Player.List)
             {
                 player.IsGodModeEnabled = false;
+                
+                var playerDisplay = PlayerDisplay.Get(player);
+            
+                foreach (var hint in Plugin.Hints)
+                {
+                    playerDisplay.RemoveHint(hint);
+                }
             }
             
             foreach (var door in Door.List)
             {
+                if (door.DoorLockType is not DoorLockType.AdminCommand)
+                {
+                    continue;
+                }
+                
                 door.Unlock();                
             }
             

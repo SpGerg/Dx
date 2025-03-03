@@ -87,9 +87,9 @@
         <Reference Include="System.Xml" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="Commands\Jail.cs" />
-        <Compile Include="Commands\Norma.cs" />
-        <Compile Include="Commands\Size.cs" />
+        <Compile Include="Commands\Admin\Jail.cs" />
+        <Compile Include="Commands\Admin\Norma.cs" />
+        <Compile Include="Commands\Admin\Size.cs" />
         <Compile Include="Config.cs" />
         <Compile Include="Events\Internal\Player.cs" />
         <Compile Include="Events\Internal\Server.cs" />

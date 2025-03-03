@@ -9,7 +9,7 @@ namespace Dx.Core.API.Features.Commands
 {
     public class CommandContext
     {
-        public CommandContext(ICommandSender commandSender, Dictionary<string, string> arguments, ArraySegment<string> arraySegment)
+        public CommandContext(ICommandSender commandSender, IReadOnlyDictionary<string, string> arguments, ArraySegment<string> arraySegment)
         {
             CommandSender = commandSender;
             Arguments = arguments;
@@ -18,7 +18,7 @@ namespace Dx.Core.API.Features.Commands
 
         public ICommandSender CommandSender { get; }
         
-        public Dictionary<string, string> Arguments { get; }
+        public IReadOnlyDictionary<string, string> Arguments { get; }
 
         public ArraySegment<string> ArraySegment { get; }
 

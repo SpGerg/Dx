@@ -3,9 +3,8 @@ using CommandSystem;
 using Dx.AdminUtilities.Features.Jail;
 using Dx.Core.API.Extensions;
 using Dx.Core.API.Features.Commands;
-using Exiled.API.Features;
 
-namespace Dx.AdminUtilities.Commands;
+namespace Dx.AdminUtilities.Commands.Admin;
 
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
 public class Jail : CommandBase

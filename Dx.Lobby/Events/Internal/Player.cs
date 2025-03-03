@@ -1,5 +1,8 @@
+using Exiled.API.Enums;
 using Exiled.API.Features;
 using Exiled.Events.EventArgs.Player;
+using HintServiceMeow.Core.Utilities;
+using UnityEngine;
 using EventTarget = Exiled.Events.Handlers.Player;
 
 namespace Dx.Lobby.Events.Internal
@@ -8,13 +11,13 @@ namespace Dx.Lobby.Events.Internal
     {
         public static void Register()
         {
-            EventTarget.Verified += TeleportToSchematicOnVerified;
+            EventTarget.Verified += TeleportToLobbyOnVerified;
             EventTarget.PickingUpItem += CancelPickingUpInLobbyOnPickingUpItem;
         }
 
         public static void Unregister()
         {
-            EventTarget.Verified -= TeleportToSchematicOnVerified;
+            EventTarget.Verified -= TeleportToLobbyOnVerified;
             EventTarget.PickingUpItem -= CancelPickingUpInLobbyOnPickingUpItem;
         }
 
@@ -25,10 +28,10 @@ namespace Dx.Lobby.Events.Internal
                 return;
             }
 
-            ev.IsAllowed = Plugin.Instance.Config.IsCanPickingUp;
+            ev.IsAllowed = Plugin.Config.IsCanPickingUp;
         }
 
-        private static void TeleportToSchematicOnVerified(VerifiedEventArgs ev)
+        private static void TeleportToLobbyOnVerified(VerifiedEventArgs ev)
         {
             if (Round.InProgress)
             {
@@ -37,11 +40,35 @@ namespace Dx.Lobby.Events.Internal
 
             var player = ev.Player;
 
-            player.Role.Set(Plugin.Instance.Config.LobbyRole);
+            player.Role.Set(Plugin.Config.LobbyRole);
             player.IsGodModeEnabled = true;
+
+            Vector3 position;
             
-            player.Teleport(Plugin.SelectedSchematic.SpawnPosition);
+            if (Plugin.IsUsingSchematic)
+            {
+                position = Plugin.SelectedSchematic.SpawnPosition;
+            }
+            else
+            {
+                var room = Room.Get(Plugin.Config.SpawnRoomType);
+
+                foreach (var door in room.Doors)
+                {
+                    door.Lock(DoorLockType.AdminCommand);
+                }
+
+                position = room.WorldPosition(Plugin.Config.RoomOffset);
+            }
+
+            player.Teleport(position);
+
+            var playerDisplay = PlayerDisplay.Get(player);
             
+            foreach (var hint in Plugin.Hints)
+            {
+                playerDisplay.AddHint(hint);
+            }
         }
     }
 }

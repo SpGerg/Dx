@@ -9,6 +9,7 @@
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>Dx.NoRules</RootNamespace>
         <AssemblyName>Dx.NoRules</AssemblyName>
+        <LangVersion>9.0</LangVersion>
         <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
     </PropertyGroup>
@@ -91,7 +92,11 @@
     <ItemGroup>
         <Compile Include="API\Features\ShootingEffects\Components\MovingForward.cs" />
         <Compile Include="API\Features\ShootingEffects\Events\Internal\Player.cs" />
+        <Compile Include="Commands\User\Take.cs" />
         <Compile Include="Config.cs" />
+        <Compile Include="Events\Internal\Map.cs" />
+        <Compile Include="Events\Internal\Player.cs" />
+        <Compile Include="Events\Internal\Server.cs" />
         <Compile Include="Plugin.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
     </ItemGroup>

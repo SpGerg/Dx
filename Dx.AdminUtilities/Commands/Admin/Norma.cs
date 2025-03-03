@@ -4,7 +4,7 @@ using Dx.AdminUtilities.Features.Admin;
 using Dx.Core.API.Features.Commands;
 using Exiled.API.Features.Pools;
 
-namespace Dx.AdminUtilities.Commands;
+namespace Dx.AdminUtilities.Commands.Admin;
 
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
 public class Norma : CommandBase

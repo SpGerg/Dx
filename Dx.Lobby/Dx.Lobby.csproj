@@ -9,6 +9,7 @@
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>Dx.Lobby</RootNamespace>
         <AssemblyName>Dx.Lobby</AssemblyName>
+        <LangVersion>9.0</LangVersion>
         <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
     </PropertyGroup>
@@ -34,6 +35,9 @@
     <ItemGroup>
         <Reference Include="Assembly-CSharp-Publicized">
             <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-Publicized.dll</HintPath>
+        </Reference>
+        <Reference Include="HintServiceMeow-Exiled">
+            <HintPath>$(EXILED_REFERENCES)\HintServiceMeow-Exiled.dll</HintPath>
         </Reference>
         <Reference Include="MapEditorReborn">
             <HintPath>$(EXILED_REFERENCES)\MapEditorReborn.dll</HintPath>
@@ -93,6 +97,8 @@
         <Compile Include="Config.cs" />
         <Compile Include="Events\Internal\Player.cs" />
         <Compile Include="Events\Internal\Server.cs" />
+        <Compile Include="Hints\TimerHint.cs" />
+        <Compile Include="Hints\WaitingPlayersHint.cs" />
         <Compile Include="Patches\CharacterClassManagerPatch.cs" />
         <Compile Include="Plugin.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />

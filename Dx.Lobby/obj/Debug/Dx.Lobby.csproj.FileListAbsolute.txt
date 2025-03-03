@@ -64,3 +64,4 @@ C:\Users\spger\Desktop\Dx\Dx.Lobby\bin\Debug\Dx.Core.dll
 C:\Users\spger\Desktop\Dx\Dx.Lobby\bin\Debug\Dx.Core.pdb
 C:\Users\spger\Desktop\Dx\Dx.Lobby\bin\Debug\Dx.Core.dll.config
 C:\Users\spger\Desktop\Dx\Dx.Lobby\bin\Debug\Assembly-CSharp-Publicized.dll
+C:\Users\spger\Desktop\Dx\Dx.Lobby\bin\Debug\HintServiceMeow-Exiled.dll

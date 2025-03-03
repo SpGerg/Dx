@@ -1,9 +1,8 @@
 using System;
 using CommandSystem;
 using Dx.Core.API.Features.Commands;
-using Exiled.API.Features;
 
-namespace Dx.AdminUtilities.Commands;
+namespace Dx.AdminUtilities.Commands.Admin;
 
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
 public class Size : CommandBase
