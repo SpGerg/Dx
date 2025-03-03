@@ -11,8 +11,7 @@ namespace Dx.NoRules.Events.Internal
 {
     internal static class Player
     {
-        private static readonly Dictionary<string, DateTime> _times =
-            new();
+        private static readonly Dictionary<string, DateTime> _times = new();
 
         public static void Register()
         {
