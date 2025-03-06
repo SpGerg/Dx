@@ -38,7 +38,12 @@ namespace Dx.Lobby.Events.Internal
             Plugin.SelectedSchematic = schematicInfo;
             
             GameObject.Find("StartRound").transform.localScale = Vector3.zero;
-
+            
+            if (!Plugin.IsUsingSchematic)
+            {
+                return;
+            }
+            
             var data = MapUtils.GetSchematicDataByName(schematicInfo.SchematicName);
 
             if (data is null)

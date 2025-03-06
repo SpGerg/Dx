@@ -16,7 +16,7 @@ namespace Dx.Lobby
 
         public static Config Config => _config;
 
-        public static bool IsUsingSchematic => Config.SpawnRoomType is not RoomType.Unknown;
+        public static bool IsUsingSchematic => Config.SpawnRoomType is RoomType.Unknown;
         
         public static LobbySchematicSerializable SelectedSchematic { get; internal set; }
         
@@ -36,7 +36,7 @@ namespace Dx.Lobby
             _harmony.PatchAll();
             
             Instance = this;
-            _config = Config;
+            _config = base.Config;
             
             _hints.Add(new Hint
             {

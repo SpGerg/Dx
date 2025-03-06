@@ -22,6 +22,11 @@ public class CassieMessage
 
     public void Speak()
     {
+        if (string.IsNullOrEmpty(Message))
+        {
+            return;
+        }
+        
         Cassie.MessageTranslated(Message, Translation, IsHeld, IsNoisy, IsSubtitles);
     }
 }

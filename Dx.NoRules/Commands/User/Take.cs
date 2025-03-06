@@ -1,4 +1,5 @@
 using System;
+using CommandSystem;
 using Dx.Core.API.Features.Commands;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
@@ -9,6 +10,7 @@ using UnityEngine;
 
 namespace Dx.NoRules.Commands.User
 {
+    [CommandHandler(typeof(ClientCommandHandler))]
     public class Take : CommandBase
     {
         public override string Command => "take";
@@ -18,6 +20,8 @@ namespace Dx.NoRules.Commands.User
         public override string Description => "Позволяет подобрать карту в руки";
 
         public override CommandParameter[] Parameters { get; } = Array.Empty<CommandParameter>();
+
+        private readonly int _pickupId = LayerMask.GetMask("Pickup");
         
         public override CommandResponse Execute(CommandContext context)
         {
@@ -39,7 +43,9 @@ namespace Dx.NoRules.Commands.User
                 };
             }
 
-            if (!Physics.Raycast(player.Position, player.CameraTransform.forward, out var hit, 3f))
+            var ray = new Ray(player.CameraTransform.position, player.CameraTransform.forward);
+            
+            if (!Physics.Raycast(ray, out var hit, 7f, _pickupId))
             {
                 return new CommandResponse
                 {

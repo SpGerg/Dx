@@ -47,6 +47,8 @@ namespace Dx.Core.API.Features.Commands
                 response = $"Использование команды: {Usage}";
                 return false;
             }
+
+            arguments = new ArraySegment<string>(arguments.ToArray());
             
             var context = new CommandContext(sender, CommandParser.ParseArguments(Parameters, arguments.Array), arguments);
 

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Exiled.API.Features;
 
 namespace Dx.Core.API.Features.Commands;
 
@@ -11,8 +12,6 @@ public static class CommandParser
         {
             return new Dictionary<string, string>();
         }
-        
-        arguments = arguments.Skip(1).ToArray();
         
         var result = new Dictionary<string, string>();
 

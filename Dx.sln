@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dx.Lobby", "Dx.Lobby\Dx.Lob
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dx.NoRules", "Dx.NoRules\Dx.NoRules.csproj", "{1FEBD499-C0FE-460E-80CD-FBFB990ECDAE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dx.Events", "Dx.Events\Dx.Events.csproj", "{4DB7FE58-ACD8-4470-B76B-46C94A1F1993}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{1FEBD499-C0FE-460E-80CD-FBFB990ECDAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FEBD499-C0FE-460E-80CD-FBFB990ECDAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FEBD499-C0FE-460E-80CD-FBFB990ECDAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DB7FE58-ACD8-4470-B76B-46C94A1F1993}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DB7FE58-ACD8-4470-B76B-46C94A1F1993}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DB7FE58-ACD8-4470-B76B-46C94A1F1993}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DB7FE58-ACD8-4470-B76B-46C94A1F1993}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
