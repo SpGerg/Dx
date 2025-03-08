@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using CommandSystem;
 using Dx.Core.API.Features.Commands;
 using Exiled.API.Extensions;
@@ -21,8 +22,8 @@ namespace Dx.NoRules.Commands.User
 
         public override CommandParameter[] Parameters { get; } = Array.Empty<CommandParameter>();
 
-        private readonly int _pickupId = LayerMask.GetMask("Pickup");
-        
+        private const float _maxDistance = 5;
+
         public override CommandResponse Execute(CommandContext context)
         {
             if (!Player.TryGet(context.CommandSender, out var player))
@@ -43,29 +44,23 @@ namespace Dx.NoRules.Commands.User
                 };
             }
 
-            var ray = new Ray(player.CameraTransform.position, player.CameraTransform.forward);
+            var pickup = Pickup.List.Where(pickup => pickup.Type.IsKeycard()).OrderBy(keycard => Vector3.Distance(keycard.Position, player.Position)).FirstOrDefault();
             
-            if (!Physics.Raycast(ray, out var hit, 7f, _pickupId))
+            if (pickup == default || Vector3.Distance(pickup.Position, player.Position) > _maxDistance)
             {
                 return new CommandResponse
                 {
-                    Response = "Вы должны смотреть на карту",
+                    Response = "Не найдено ближайщей карты",
                     Success = false
                 };
             }
 
-            var pickup = Pickup.Get(hit.transform.root.gameObject);
-
-            if (!pickup.Type.IsKeycard())
+            if (player.CurrentItem is not null)
             {
-                return new CommandResponse
-                {
-                    Response = "Предмет на который вы смотрите не карта",
-                    Success = false
-                };
+                player.DropItem(player.CurrentItem);
             }
 
-            player.AddItem(pickup);
+            player.CurrentItem = Item.Get(pickup.Serial);
             pickup.Destroy();
 
             return CommandResponse.Successful;

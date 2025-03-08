@@ -1,6 +1,8 @@
 using System;
 using Dx.Core.API.Features.Audio;
 using Exiled.API.Enums;
+using Exiled.API.Extensions;
+using Exiled.API.Features;
 using Exiled.API.Features.Doors;
 using Exiled.Events.EventArgs.Server;
 using MEC;
@@ -12,15 +14,11 @@ namespace Dx.NoRules.Events.Internal
 {
     internal static class Server
     {
-        private static AudioBot _audioBot;
-        
         public static void Register()
         {
             EventTarget.RoundStarted += BlockDoorsAndOffLightOnRoundStarted;
             EventTarget.WaitingForPlayers += ClearCoroutinesOnWaitingForPlayers;
             EventTarget.RespawnedTeam += SetLastSpawnedWaveOnSpawned;
-
-            _audioBot = new BasicAudioBot(Plugin.Config.RoundStartAudio);
         }
         
         public static void Unregister()
@@ -48,7 +46,8 @@ namespace Dx.NoRules.Events.Internal
                 Plugin.Config.CassieMessageAtRoundStart.Speak();
             });
             
-            _audioBot.Play(Vector3.zero);
+            var audioBot = new BasicAudioBot(Plugin.Config.RoundStartAudios.GetRandomValue());
+            audioBot.Play(Vector3.zero);
         }
 
         /// <summary>

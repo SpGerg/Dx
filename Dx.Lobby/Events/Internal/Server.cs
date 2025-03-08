@@ -63,6 +63,11 @@ namespace Dx.Lobby.Events.Internal
         {
             foreach (var player in Exiled.API.Features.Player.List)
             {
+                if (player.IsNPC)
+                {
+                    continue;
+                }
+                
                 player.IsGodModeEnabled = false;
                 
                 var playerDisplay = PlayerDisplay.Get(player);

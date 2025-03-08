@@ -57,6 +57,9 @@
         <Reference Include="Exiled.CustomRoles">
             <HintPath>$(EXILED_REFERENCES)\Exiled.CustomRoles.dll</HintPath>
         </Reference>
+        <Reference Include="Exiled.CustomItems">
+            <HintPath>$(EXILED_REFERENCES)\Exiled.CustomItems.dll</HintPath>
+        </Reference>
         <Reference Include="Exiled.Events">
             <HintPath>$(EXILED_REFERENCES)\Exiled.Events.dll</HintPath>
         </Reference>
@@ -100,7 +103,10 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="API\Extensions\PlayerExtensions.cs" />
-        <Compile Include="API\Features\CustomRoles\Scp575.cs" />
+        <Compile Include="API\Features\CustomItems\SniperRifle\Hints\SniperRifleHint.cs" />
+        <Compile Include="API\Features\CustomItems\SniperRifle\SniperRifleItem.cs" />
+        <Compile Include="API\Features\CustomRoles\Scp575\Scp575Role.cs" />
+        <Compile Include="API\Features\CustomRoles\Scp575\Scp575Config.cs" />
         <Compile Include="API\Features\ProximityChat\Events\Internal\Player.cs" />
         <Compile Include="API\Features\ProximityChat\ProximityChat.cs" />
         <Compile Include="API\Features\ShootingEffects\Components\MovingForward.cs" />

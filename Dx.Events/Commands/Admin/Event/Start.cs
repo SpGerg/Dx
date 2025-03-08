@@ -1,6 +1,8 @@
 using System;
 using Dx.Core.API.Features.Commands;
 using Dx.Core.API.Features.Webhooks;
+using Exiled.API.Features;
+using HintServiceMeow.Core.Utilities;
 
 namespace Dx.Events.Commands.Admin.Event
 {
@@ -23,7 +25,13 @@ namespace Dx.Events.Commands.Admin.Event
             new()
             {
                 Name = "rp_level",
-                DisplayName = "Уровень рп",
+                DisplayName = "уровень рп",
+                IsRequired = true,
+            },
+            new()
+            {
+                Name = "host",
+                DisplayName = "проводящий",
                 IsRequired = true,
             }
         };
@@ -34,18 +42,28 @@ namespace Dx.Events.Commands.Admin.Event
             {
                 return new CommandResponse
                 {
-                    Response = $"Уже идёт другой ивент, с именем {Plugin.EventName}",
+                    Response = $"Уже идёт другой ивент, под именем {Plugin.EventName}",
                     Success = false
                 };
             }
             
             Plugin.EventName = context.Get("name");
             Plugin.EventRpLevel = context.Get("rp_level");
+            Plugin.EventHost = context.Get("host");
+            Plugin.EventStartTime = DateTime.Now;
 
             var webhookMessage = new WebhookMessage(Plugin.Config.EventStartedMessage);
             webhookMessage.Message = webhookMessage.Message
                 .Replace("%name%", Plugin.EventName)
-                .Replace("%rp_level%", Plugin.EventRpLevel);
+                .Replace("%rp_level%", Plugin.EventRpLevel)
+                .Replace("%host%", Plugin.EventHost)
+                .Replace("%start_time%", Plugin.EventStartTime.ToString());
+
+            foreach (var player in Player.List)
+            {
+                var playerDisplay = PlayerDisplay.Get(player);
+                playerDisplay.AddHint(Plugin.EventInfoHint);
+            }
             
             Core.Plugin.Webhook.Send(webhookMessage);
             

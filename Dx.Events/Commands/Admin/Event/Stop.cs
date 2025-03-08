@@ -1,6 +1,8 @@
 using System;
 using Dx.Core.API.Features.Commands;
 using Dx.Core.API.Features.Webhooks;
+using Exiled.API.Features;
+using HintServiceMeow.Core.Utilities;
 
 namespace Dx.Events.Commands.Admin.Event
 {
@@ -28,12 +30,23 @@ namespace Dx.Events.Commands.Admin.Event
             var webhookMessage = new WebhookMessage(Plugin.Config.EventStoppedMessage);
             webhookMessage.Message = webhookMessage.Message
                 .Replace("%name%", Plugin.EventName)
-                .Replace("%rp_level%", Plugin.EventRpLevel);
+                .Replace("%rp_level%", Plugin.EventRpLevel)
+                .Replace("%host%", Plugin.EventHost)
+                .Replace("%start_time%", Plugin.EventStartTime.ToString())
+                .Replace("%passed_time%", (DateTime.Now - Plugin.EventStartTime).ToString());
             
             Core.Plugin.Webhook.Send(webhookMessage);
+            
+            foreach (var player in Player.List)
+            {
+                var playerDisplay = PlayerDisplay.Get(player);
+                playerDisplay.RemoveHint(Plugin.EventInfoHint);
+            }
 
             Plugin.EventName = null;
             Plugin.EventRpLevel = null;
+            Plugin.EventHost = null;
+            Plugin.EventStartTime = null;
             
             return CommandResponse.Successful;
         }

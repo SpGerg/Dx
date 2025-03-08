@@ -57,7 +57,7 @@ public class Webhook
             {
                 new
                 {
-                    title = webhookMessage.ToString(),
+                    title = webhookMessage.Title,
                     description = webhookMessage.Message,
                     color = webhookMessage.Color.HexColorToInteger()
                 }

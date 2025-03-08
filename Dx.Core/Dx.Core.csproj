@@ -163,6 +163,7 @@
         <Compile Include="API\Features\Webhooks\Webhook.cs" />
         <Compile Include="API\Features\Webhooks\WebhookMessage.cs" />
         <Compile Include="API\Interfaces\IRepository.cs" />
+        <Compile Include="API\Utilities\SliderBuilder.cs" />
         <Compile Include="Config.cs" />
         <Compile Include="Plugin.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />

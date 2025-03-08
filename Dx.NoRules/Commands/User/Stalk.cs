@@ -23,6 +23,8 @@ namespace Dx.NoRules.Commands.User
         public override string Description => "Телепортирует к ближайшему игроку";
 
         public override CommandParameter[] Parameters { get; } = Array.Empty<CommandParameter>();
+
+        private const int _percent = 1000;
         
         public override CommandResponse Execute(CommandContext context)
         {
@@ -44,20 +46,11 @@ namespace Dx.NoRules.Commands.User
                 };
             }
 
-            if (scp106Role.Vigor < Plugin.Config.StalkVigorCost)
+            if ((scp106Role.Vigor * _percent) < Plugin.Config.StalkVigorCost)
             {
                 return new CommandResponse
                 {
                     Response = $"Недостаточно энергии, требуется: {Plugin.Config.StalkVigorCost}",
-                    Success = false
-                };
-            }
-            
-            if (player.GetCustomRoles().Count > 0)
-            {
-                return new CommandResponse
-                {
-                    Response = "Вы не можете использовать данную команду на данной роли",
                     Success = false
                 };
             }
@@ -91,6 +84,7 @@ namespace Dx.NoRules.Commands.User
                 };
             }
 
+            scp106Role.Vigor -= Plugin.Config.StalkVigorCost;
             scp106Role.UsePortal(target.Position);
             
             return CommandResponse.Successful;

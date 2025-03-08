@@ -4,7 +4,9 @@ using Dx.NoRules.API.Extensions;
 using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
+using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Player;
+using PlayerRoles;
 using Respawning.Waves;
 using EventTarget = Exiled.Events.Handlers.Player;
 using KeycardPermissions = Interactables.Interobjects.DoorUtils.KeycardPermissions;
@@ -18,7 +20,8 @@ namespace Dx.NoRules.Events.Internal
         public static void Register()
         {
             EventTarget.TriggeringTesla += CancelTeslaOnTeslaTriggering;
-            EventTarget.Shooting += CancelAmmoDecreaseOnShooting;
+            EventTarget.ReloadingWeapon += RefillAmmoOnReloadingWeapon;
+            EventTarget.ChangingItem += RefillAmmoOnChangingItem;
             EventTarget.Verified += SpawnPlayerInTeamOnVerified;
             EventTarget.UsingRadioBattery += CancelBatteryDecreaseOnUsingRadioBattery;
             EventTarget.InteractingDoor += OpenDoorIfHasPermissionOnInteractingDoor;
@@ -30,7 +33,8 @@ namespace Dx.NoRules.Events.Internal
         public static void Unregister()
         {
             EventTarget.TriggeringTesla -= CancelTeslaOnTeslaTriggering;
-            EventTarget.Shooting -= CancelAmmoDecreaseOnShooting;
+            EventTarget.ChangingItem -= RefillAmmoOnChangingItem;
+            EventTarget.ReloadingWeapon -= RefillAmmoOnReloadingWeapon;
             EventTarget.Verified -= SpawnPlayerInTeamOnVerified;
             EventTarget.UsingRadioBattery -= CancelBatteryDecreaseOnUsingRadioBattery;
             EventTarget.InteractingDoor -= OpenDoorIfHasPermissionOnInteractingDoor;
@@ -57,15 +61,23 @@ namespace Dx.NoRules.Events.Internal
         /// Отменяет потребление патронов
         /// </summary>
         /// <param name="ev"></param>
-        private static void CancelAmmoDecreaseOnShooting(ShootingEventArgs ev)
+        private static void RefillAmmoOnReloadingWeapon(ReloadingWeaponEventArgs ev)
         {
-            if (ev.Firearm.AmmoDrain is 0)
+            ev.Player.SetAmmo(ev.Firearm.AmmoType, (ushort) (ev.Firearm.TotalMaxAmmo + 1));
+        }
+        
+        /// <summary>
+        /// Отменяет потребление патронов
+        /// </summary>
+        /// <param name="ev"></param>
+        private static void RefillAmmoOnChangingItem(ChangingItemEventArgs ev)
+        {
+            if (ev.Item is not Firearm firearm)
             {
                 return;
             }
-
-            ev.Firearm.MagazineAmmo++;
-            ev.Firearm.AmmoDrain = 0;
+            
+            ev.Player.SetAmmo(firearm.AmmoType, 1);
         }
         
         /// <summary>
@@ -74,6 +86,15 @@ namespace Dx.NoRules.Events.Internal
         /// <param name="ev"></param>
         private static void OpenDoorIfHasPermissionOnInteractingDoor(InteractingDoorEventArgs ev)
         {
+            /*
+            if (ev.Player.Role.Type is RoleTypeId.Scp049 && !ev.IsAllowed && ev.Player.CurrentItem is Keycard keycard)
+            {
+                ev.IsAllowed = ev.Door.RequiredPermissions.RequiredPermissions.HasFlag(keycard.Permissions);
+                
+                return;
+            }
+            */
+            
             if (ev.IsAllowed ||
                 !ev.Player.HasKeycardPermission(ev.Door.RequiredPermissions.RequiredPermissions))
             {
@@ -104,6 +125,15 @@ namespace Dx.NoRules.Events.Internal
         /// <param name="ev"></param>
         private static void OpenLockerIfHasPermissionOnInteractingLocker(InteractingLockerEventArgs ev)
         {
+            /*
+            if (ev.Player.Role.Type is RoleTypeId.Scp049 && !ev.IsAllowed && ev.Player.CurrentItem is Keycard keycard)
+            {
+                ev.IsAllowed = ev.InteractingChamber.RequiredPermissions.HasFlag(keycard.Permissions);
+                
+                return;
+            }
+            */
+            
             if (ev.IsAllowed ||
                 !ev.Player.HasKeycardPermission(ev.InteractingChamber.Base.RequiredPermissions))
             {

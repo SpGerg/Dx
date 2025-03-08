@@ -5,6 +5,7 @@ using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Attributes;
+using Exiled.API.Features.Spawn;
 using Exiled.CustomRoles.API.Features;
 using Exiled.Events.EventArgs.Interfaces;
 using Exiled.Events.EventArgs.Map;
@@ -13,14 +14,16 @@ using HintServiceMeow.Core.Models.HintContent;
 using HintServiceMeow.Core.Utilities;
 using MEC;
 using PlayerRoles;
+using PluginAPI.Events;
+using UnityEngine;
 using EventTargetPlayer = Exiled.Events.Handlers.Player;
 using EventTargetMap = Exiled.Events.Handlers.Map;
 using Hint = HintServiceMeow.Core.Models.Hints.Hint;
 
-namespace Dx.NoRules.API.Features.CustomRoles
+namespace Dx.NoRules.API.Features.CustomRoles.Scp575
 {
     [CustomRole(RoleTypeId.Scp106)]
-    public class Scp575 : CustomRole
+    public class Scp575Role : CustomRole
     {
         private static readonly Dictionary<Player, Cooldown> _cooldowns = new();
 
@@ -40,30 +43,45 @@ namespace Dx.NoRules.API.Features.CustomRoles
 
         private const string _cooldownHintId = "special-ability-cooldown";
 
-        private static readonly Hint TargetHint = new()
-        {
-            Content = new StringContent(Plugin.Config.DarkRoomHint.Text),
-            XCoordinate = Plugin.Config.DarkRoomHint.Position.x,
-            YCoordinate = Plugin.Config.DarkRoomHint.Position.y,
-            FontSize = Plugin.Config.DarkRoomHint.Size
-        };
+        private const float _flashbangDistance = 10;
 
-        private static readonly Hint DeathOnSurfaceHint = new()
-        {
-            Content = new StringContent(Plugin.Config.DeathOnSurfaceHint.Text),
-            XCoordinate = Plugin.Config.DeathOnSurfaceHint.Position.x,
-            YCoordinate = Plugin.Config.DeathOnSurfaceHint.Position.y,
-            FontSize = Plugin.Config.DeathOnSurfaceHint.Size
-        };
+        private Hint _targetHint;
+
+        private Hint _deathOnSurfaceHint;
 
         protected override void SubscribeEvents()
         {
+            SpawnChance = Plugin.Config.Scp575Config.SpawnChance;
+            SpawnProperties.RoomSpawnPoints.Add(new RoomSpawnPoint
+            {
+                Chance = SpawnChance,
+                Offset = Plugin.Config.Scp575Config.SpawnRoomOffset,
+                Room = Plugin.Config.Scp575Config.SpawnRoom
+            });
+
+            _targetHint = new Hint
+            {
+                Content = new StringContent(Plugin.Scp575Config.DarkRoomHint.Text),
+                XCoordinate = Plugin.Scp575Config.DarkRoomHint.Position.x,
+                YCoordinate = Plugin.Scp575Config.DarkRoomHint.Position.y,
+                FontSize = Plugin.Scp575Config.DarkRoomHint.Size
+            };
+            
+            _deathOnSurfaceHint = new Hint
+            {
+                Content = new StringContent(Plugin.Scp575Config.DeathOnSurfaceHint.Text),
+                XCoordinate = Plugin.Scp575Config.DeathOnSurfaceHint.Position.x,
+                YCoordinate = Plugin.Scp575Config.DeathOnSurfaceHint.Position.y,
+                FontSize = Plugin.Scp575Config.DeathOnSurfaceHint.Size
+            };
+            
             EventTargetPlayer.PickingUpItem += CancelPickingUpOnPickingUp;
             EventTargetPlayer.InteractingDoor += CancelDoorOpenOnInteractingDoor;
             EventTargetPlayer.TogglingNoClip += ExecuteSafeAbilityOnTogglingNoClip;
             EventTargetPlayer.Hurting += CancelOtherDamagesOnHurting;
 
             EventTargetMap.ExplodingGrenade += TakeDamageFromFlashlightOnExplodingGrenade;
+            EventTargetMap.GeneratorActivating += KillScp575OnGeneratorActivated;
 
             base.SubscribeEvents();
         }
@@ -76,15 +94,19 @@ namespace Dx.NoRules.API.Features.CustomRoles
             EventTargetPlayer.Hurting -= CancelOtherDamagesOnHurting;
             
             EventTargetMap.ExplodingGrenade -= TakeDamageFromFlashlightOnExplodingGrenade;
+            EventTargetMap.GeneratorActivating -= KillScp575OnGeneratorActivated;
 
             base.UnsubscribeEvents();
         }
 
         protected override void RoleAdded(Player player)
         {
-            player.ChangeAppearance(RoleTypeId.Scp106);
+            Timing.CallDelayed(0.75f, () =>
+            {
+                player.ChangeAppearance(RoleTypeId.Scp106);
+            });
             
-            _cooldowns.Add(player, new Cooldown(Plugin.Config.SpecialAbilityCooldown));
+            _cooldowns.Add(player, new Cooldown(Plugin.Scp575Config.SpecialAbilityCooldown));
             Plugin.Coroutines.Start($"{player.UserId}-dark-room-coroutine", DarkRoomCoroutine(player));
             
             base.RoleAdded(player);
@@ -97,32 +119,54 @@ namespace Dx.NoRules.API.Features.CustomRoles
             base.RoleRemoved(player);
         }
 
+        private void KillScp575OnGeneratorActivated(GeneratorActivatingEventArgs ev)
+        {
+            if (!ev.IsAllowed)
+            {
+                return;
+            }
+
+            // + 1 т.к -ing ивент
+            if ((Recontainer.EngagedGeneratorCount + 1) != Generator.List.Count)
+            {
+                return;
+            }
+
+            foreach (var player in Player.List.Where(Check))
+            {
+                player.Kill("Recontain");
+            }
+        }
+
         /// <summary>
         /// Нанести урон 
         /// </summary>
         /// <param name="ev"></param>
         private void TakeDamageFromFlashlightOnExplodingGrenade(ExplodingGrenadeEventArgs ev)
         {
-            if (ev.Projectile.Type is not ItemType.Flashlight)
+            if (ev.Projectile.ProjectileType is not ProjectileType.Flashbang)
             {
                 return;
             }
 
-            var room = Room.Get(ev.Projectile.Position);
-
-            if (room is null)
+            foreach (var player in Player.List)
             {
-                return;
-            }
-
-            foreach (var player in room.Players)
-            {
+                if (player.IsDead)
+                {
+                    continue;
+                }
+                
+                if (Vector3.Distance(player.Position, ev.Projectile.Position) > _flashbangDistance)
+                {
+                    continue;
+                }
+                
                 if (!Check(player))
                 {
                     continue;
                 }
                 
-                player.Hurt(Plugin.Config.FlashlightDamage, DamageType.Bleeding);
+                player.Hurt(Plugin.Scp575Config.FlashlightDamage, DamageType.Custom);
             }
         }
         
@@ -137,7 +181,7 @@ namespace Dx.NoRules.API.Features.CustomRoles
                 return;
             }
 
-            if (ev.DamageHandler.Type is DamageType.MicroHid or DamageType.Decontamination)
+            if (ev.DamageHandler.Type is DamageType.MicroHid or DamageType.Decontamination or DamageType.Custom)
             {
                 return;
             }
@@ -158,7 +202,7 @@ namespace Dx.NoRules.API.Features.CustomRoles
 
             if (!_cooldowns.TryGetValue(ev.Player, out var cooldown))
             {
-                _cooldowns.Add(ev.Player, cooldown = new Cooldown(Plugin.Config.SpecialAbilityCooldown));
+                _cooldowns.Add(ev.Player, cooldown = new Cooldown(Plugin.Scp575Config.SpecialAbilityCooldown));
             }
 
             if (!cooldown.IsReady)
@@ -169,8 +213,8 @@ namespace Dx.NoRules.API.Features.CustomRoles
 
                 if (hint is not null)
                 {
-                    hint.Text = Plugin.Config.SpecialAbilityIsNotReadyHint.Text.Replace("%cooldown%",
-                        cooldown.RemainingTime.ToString());
+                    hint.Text = Plugin.Scp575Config.SpecialAbilityIsNotReadyHint.Text.Replace("%cooldown%",
+                        ((int) cooldown.RemainingTime).ToString());
                     
                     return;
                 }
@@ -178,23 +222,25 @@ namespace Dx.NoRules.API.Features.CustomRoles
                 hint = new Hint
                 {
                     Id = _cooldownHintId,
-                    Content = new StringContent(Plugin.Config.SpecialAbilityIsNotReadyHint.Text.Replace("%cooldown%", cooldown.RemainingTime.ToString())),
-                    XCoordinate = Plugin.Config.SpecialAbilityIsNotReadyHint.Position.x,
-                    YCoordinate = Plugin.Config.SpecialAbilityIsNotReadyHint.Position.y,
-                    FontSize = Plugin.Config.SpecialAbilityIsNotReadyHint.Size
+                    Content = new StringContent(Plugin.Scp575Config.SpecialAbilityIsNotReadyHint.Text.Replace("%cooldown%", ((int) cooldown.RemainingTime).ToString())),
+                    XCoordinate = Plugin.Scp575Config.SpecialAbilityIsNotReadyHint.Position.x,
+                    YCoordinate = Plugin.Scp575Config.SpecialAbilityIsNotReadyHint.Position.y,
+                    FontSize = Plugin.Scp575Config.SpecialAbilityIsNotReadyHint.Size
                 };
 
                 playerDisplay.AddHint(hint);
 
-                Plugin.Coroutines.CallDelayed(Plugin.Config.SpecialAbilityIsNotReadyHint.Duration, () =>
+                Plugin.Coroutines.CallDelayed(Plugin.Scp575Config.SpecialAbilityIsNotReadyHint.Duration, () =>
                 {
                     playerDisplay.RemoveHint(hint);
                 });
+                
+                return;
             }
 
             foreach (var door in ev.Player.CurrentRoom.Doors)
             {
-                door.Lock(Plugin.Config.SpecialAbilityDoorLockTime, DoorLockType.AdminCommand);
+                door.Lock(Plugin.Scp575Config.SpecialAbilityDoorLockTime, DoorLockType.AdminCommand);
             }
 
             cooldown.ForceUse();
@@ -245,11 +291,8 @@ namespace Dx.NoRules.API.Features.CustomRoles
         private IEnumerator<float> DarkRoomCoroutine(Player player)
         {
             var targetRoom = player.CurrentRoom;
-            targetRoom.TurnOffLights();
-            
-            //player.SendFakeSyncVar(targetRoom.RoomLightControllerNetIdentity, typeof(RoomLightController), "LightsEnabled", true);
-            
-            var damage = Plugin.Config.DarkRoomDamage;
+
+            var damage = Plugin.Scp575Config.DarkRoomDamage;
 
             var lastPlayers = targetRoom.Players;
 
@@ -259,17 +302,16 @@ namespace Dx.NoRules.API.Features.CustomRoles
                 {
                     //Включаем свет
                     targetRoom.TurnOffLights(0.0f);
-                    //player.SendFakeSyncVar(targetRoom.RoomLightControllerNetIdentity, typeof(RoomLightController), "LightsEnabled", false);
 
                     if (player.CurrentRoom.Type is RoomType.Surface)
                     {
-                        damage = Plugin.Config.DarkRoomDamage / 2;
+                        damage /= 2;
 
                         Plugin.Coroutines.Start($"{player.UserId}-death-on-surface-coroutine", DeathOnSurfaceCoroutine(player));
                     }
                     else
                     {
-                        damage = Plugin.Config.DarkRoomDamage;
+                        damage = Plugin.Scp575Config.DarkRoomDamage;
                     }
 
                     var merged = new List<Player>(player.CurrentRoom.Players.Count() + lastPlayers.Count());
@@ -279,13 +321,17 @@ namespace Dx.NoRules.API.Features.CustomRoles
                     foreach (var target in merged)
                     {
                         var playerDisplay = PlayerDisplay.Get(target);
-                        playerDisplay.RemoveHint(TargetHint);
+                        playerDisplay.RemoveHint(_targetHint);
                     }
 
                     targetRoom = player.CurrentRoom;
                     targetRoom.TurnOffLights();
-                    //player.SendFakeSyncVar(targetRoom.RoomLightControllerNetIdentity, typeof(RoomLightController), "LightsEnabled", true);
-                        
+
+                    Plugin.Coroutines.CallDelayed(Timing.WaitForOneFrame, () =>
+                    {
+                        player.SendFakeSyncVar(targetRoom.RoomLightControllerNetIdentity, typeof(RoomLightController), nameof(RoomLightController.NetworkLightsEnabled), true);
+                    });
+
                     lastPlayers = player.CurrentRoom.Players;
 
                     continue;
@@ -299,23 +345,23 @@ namespace Dx.NoRules.API.Features.CustomRoles
 
                     if (leaved.CurrentRoom == targetRoom)
                     {
-                        playerDisplay.AddHint(TargetHint);
+                        playerDisplay.AddHint(_targetHint);
                     }
                     else
                     {
-                        playerDisplay.RemoveHint(TargetHint);
+                        playerDisplay.RemoveHint(_targetHint);
                     }
                 }
 
                 foreach (var target in targetRoom.Players)
                 {
-                    if (target == player)
+                    if (target.IsScp || target == player)
                     {
                         continue;
                     }
                         
                     var playerDisplay = PlayerDisplay.Get(target);
-                    playerDisplay.AddHint(TargetHint);
+                    playerDisplay.AddHint(_targetHint);
                         
                     target.Hurt(player, damage, DamageType.Bleeding, deathText: null);
                 }
@@ -334,30 +380,28 @@ namespace Dx.NoRules.API.Features.CustomRoles
             foreach (var target in merged1)
             {
                 var playerDisplay = PlayerDisplay.Get(target);
-                playerDisplay.RemoveHint(TargetHint);
+                playerDisplay.RemoveHint(_targetHint);
             }
         }
 
         private IEnumerator<float> DeathOnSurfaceCoroutine(Player player)
         {
             var playerDisplay = PlayerDisplay.Get(player);
-            playerDisplay.AddHint(DeathOnSurfaceHint);
+            playerDisplay.AddHint(_deathOnSurfaceHint);
 
             while (player.IsAlive && Check(player))
             {
                 if (player.CurrentRoom?.Type is not RoomType.Surface)
                 {
-                    playerDisplay.RemoveHint(DeathOnSurfaceHint);
-                    
-                    yield break;
+                    break;
                 }
                 
-                player.Hurt(Plugin.Config.DamagePerSecondOnSurface, "Вы слишком долго были на поверхности!");
+                player.Hurt(Plugin.Scp575Config.DamagePerSecondOnSurface, DamageType.Custom);
 
                 yield return Timing.WaitForSeconds(1);
             }
             
-            playerDisplay.RemoveHint(DeathOnSurfaceHint);
+            playerDisplay.RemoveHint(_deathOnSurfaceHint);
         }
     }
 }

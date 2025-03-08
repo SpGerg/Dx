@@ -1,8 +1,12 @@
 using System.IO;
 using Exiled.API.Features;
+using Exiled.API.Features.Components;
+using MEC;
+using Mirror;
 using PlayerRoles;
 using SCPSLAudioApi.AudioCore;
 using UnityEngine;
+using VoiceChat;
 
 namespace Dx.Core.API.Features.Audio;
 
@@ -20,25 +24,29 @@ public class BasicAudioBot : AudioBot
             return;
         }
         
+        Disconnect();
+        
+        Npc = Npc.Spawn(AudioSettings.Name, roleTypeId, true, position);
+        Npc.RankName = "Аудио бот";
+                
+        Base = AudioPlayerBase.Get(Npc.ReferenceHub);
         Base.Loop = AudioSettings.IsLoop;
         Base.Volume = AudioSettings.Volume;
-        
-        Npc.Role.Set(roleTypeId);
-        Npc.Position = position;
-        
-        if (quaternion is not null)
+        Base.BroadcastChannel = AudioSettings.Channels;
+
+        if (quaternion.HasValue)
         {
             Npc.Rotation = quaternion.Value;
         }
 
-        if (scale is not null)
+        if (scale.HasValue)
         {
             Npc.Scale = scale.Value;
         }
-
-        PlayerRoles.Voice.Intercom.TrySetOverride(Npc.ReferenceHub, AudioSettings.IsIntercom);
         
-        Base.Enqueue(Path.Combine(Plugin.AudiosFilepath, AudioSettings.Filepath), 0);
+        _audioBots.Add(Npc.Id, this);
+        
+        Base.Enqueue(Path.Combine(Plugin.AudiosFilepath, AudioSettings.Filepath), -1);
         Base.Play(0);
     }
 

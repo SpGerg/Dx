@@ -48,6 +48,7 @@ namespace Dx.NoRules.API.Features.ProximityChat.Events.Internal
             }
 
             var playerDisplay = PlayerDisplay.Get(ev.Player);
+            playerDisplay.RemoveHint(ProximityChat.HintsId);
             
             if (isEnabled)
             {

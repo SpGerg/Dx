@@ -1,9 +1,11 @@
 using System.ComponentModel;
 using Dx.Core.API.Features;
 using Dx.Core.API.Features.Audio;
+using Dx.NoRules.API.Features.CustomRoles.Scp575Role;
 using Exiled.API.Interfaces;
 using PlayerRoles;
 using UnityEngine;
+using VoiceChat;
 
 namespace Dx.NoRules
 {
@@ -27,45 +29,6 @@ namespace Dx.NoRules
             Message = "Round starting",
             Translation = "Начало раунда"
         };
-
-        [Description("Сообщение тёмной комнаты Scp-575")]
-        public HintSettings DarkRoomHint { get; set; } = new()
-        {
-            Text = "Тьма наносит по вам урон, скорее покиньте комнату!",
-            Position = new Vector2(0, 700),
-            Size = 30
-        };
-        
-        [Description("Специальная способность не готова хинт")]
-        public HintSettings SpecialAbilityIsNotReadyHint { get; set; } = new()
-        {
-            Text = "Специальная способность не работает! Осталось: %cooldown%",
-            Position = new Vector2(0, 500),
-            Size = 30
-        };
-
-        [Description("Урон тёмной комнаты Scp-575")]
-        public float DarkRoomDamage { get; set; } = 10;
-        
-        [Description("Время насколько блокируются двери у специальной способности")]
-        public float SpecialAbilityDoorLockTime { get; set; } = 30;
-        
-        [Description("Хинт если 575 на поверхности")]
-        public HintSettings DeathOnSurfaceHint { get; set; } = new()
-        {
-            Text = "На улице находиться нельзя!",
-            Position = new Vector2(0, 600),
-            Size = 30
-        };
-
-        [Description("Кулдаун специальной способности")]
-        public float SpecialAbilityCooldown { get; set; } = 30f;
-        
-        [Description("Урон каждую секунду на поверхности Scp-575")]
-        public float DamagePerSecondOnSurface { get; set; } = 12.5f;
-        
-        [Description("Урон каждую секунду на поверхности Scp-575")]
-        public float FlashlightDamage { get; set; } = 125;
 
         [Description("Роли хаоса")]
         public RoleTypeId[] ChaosRoles { get; set; } = 
@@ -123,11 +86,41 @@ namespace Dx.NoRules
         public float ProximityChatDistance { get; set; } = 15f;
 
         [Description("Настройки аудио в начале")]
-        public AudioSettings RoundStartAudio { get; set; } = new()
+        public AudioSettings[] RoundStartAudios { get; set; } =
         {
-            Name = "C.A.S.S.I.E",
-            IsIntercom = true,
-            Volume = 100
+            new()
+            {
+                Name = "C.A.S.S.I.E",
+                Filepath = "start1.ogg",
+                Channels = VoiceChatChannel.Intercom
+            },
+            new()
+            {
+                Name = "C.A.S.S.I.E",
+                Filepath = "start2.ogg",
+                Channels = VoiceChatChannel.Intercom
+            },
+            new()
+            {
+                Name = "C.A.S.S.I.E",
+                Filepath = "start3.ogg",
+                Channels = VoiceChatChannel.Intercom
+            }
         };
+
+        [Description("Конфиг Scp-575")]
+        public Scp575Config Scp575Config { get; set; } = new();
+
+        [Description("Урон снайперской винтовки")]
+        public float SniperRifleDamage { get; set; } = 30;
+        
+        [Description("Перезарядка снайперской винтовки")]
+        public float SniperRifleCooldown { get; set; } = 10; 
+        
+        public HintSettings SniperRifleHint { get; set; } = new()
+        {
+            Position = new Vector2(0, 700),
+            Size = 32
+        }; 
     }
 }
