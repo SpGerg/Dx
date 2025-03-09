@@ -1,12 +1,19 @@
 using System.ComponentModel;
 using Dx.Core.API.Features;
 using Exiled.API.Enums;
+using Exiled.API.Interfaces;
 using UnityEngine;
 
 namespace Dx.NoRules.API.Features.CustomRoles.Scp575Role
 {
-    public class Scp575Config
+    public class Scp575Config : IConfig
     {
+        [Description("Включён или нет")]
+        public bool IsEnabled { get; set; }
+        
+        [Description("Дебаг или нет")]
+        public bool Debug { get; set; }
+        
         [Description("Кулдаун специальной способности")]
         public float SpecialAbilityCooldown { get; set; } = 30f;
         
@@ -61,6 +68,25 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575Role
             Message = "SCP 575 dead",
             Translation = "SCP-575 умер"
         };
+        
+        [Description("Кэсси при спавне")]
+        public CassieMessage CassieOnSpawn { get; set; } = new()
+        {
+            Message = "SCP 575 spawn",
+            Translation = "SCP-575 заспавнился"
+        };
+
+        [Description("Хинт при спавне")]
+        public HintSettings HintOnSpawn { get; set; } = new()
+        {
+            Text = "Вы Scp-575",
+            Position = new Vector2(0, 300),
+            Size = 24,
+            Duration = 3
+        };
+
+        [Description("Задержка кэсси при спавне")]
+        public float CassieOnSpawnDelay { get; set; } = 5f;
 
         [Description("Минимальное кол-во игроков для спавна")]
         public int MinimumPlayersToSpawn { get; set; } = 5;

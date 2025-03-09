@@ -12,6 +12,7 @@ using Exiled.CustomRoles.API.Features;
 using Exiled.Events.EventArgs.Interfaces;
 using Exiled.Events.EventArgs.Map;
 using Exiled.Events.EventArgs.Player;
+using HintServiceMeow.Core.Extension;
 using HintServiceMeow.Core.Models.HintContent;
 using HintServiceMeow.Core.Utilities;
 using MEC;
@@ -45,6 +46,8 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
         public override RoleTypeId Role { get; set; } = RoleTypeId.Tutorial;
 
         public override bool IgnoreSpawnSystem { get; set; } = true;
+
+        public override Exiled.API.Features.Broadcast Broadcast { get; set; }
 
         private const string _cooldownHintId = "special-ability-cooldown";
 
@@ -146,11 +149,44 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             base.RoleRemoved(player);
         }
 
+        protected override void ShowBroadcast(Player player)
+        {
+        }
+
+        protected override void ShowMessage(Player player)
+        {
+            if (!Plugin.Scp575Config.HintOnSpawn.Enabled)
+            {
+                return;
+            }
+            
+            var hint = new Hint
+            {
+                Content = new StringContent(Plugin.Scp575Config.HintOnSpawn.Text),
+                XCoordinate = Plugin.Scp575Config.HintOnSpawn.Position.x,
+                YCoordinate = Plugin.Scp575Config.HintOnSpawn.Position.y,
+                FontSize = Plugin.Scp575Config.HintOnSpawn.Size
+            };
+
+            var playerDisplay = PlayerDisplay.Get(player);
+            playerDisplay.AddHint(hint);
+            
+            Plugin.Coroutines.CallDelayed(Plugin.Scp575Config.HintOnSpawn.Duration, () =>
+            {
+                playerDisplay.RemoveHint(hint);
+            });
+        }
+
         /// <summary>
         /// Заспавнить Scp-575
         /// </summary>
         private void SpawnScp575OnRoundStarted()
         {
+            if (!Plugin.Scp575Config.IsEnabled)
+            {
+                return;
+            }
+            
             if (Player.List.Count < Plugin.Scp575Config.MinimumPlayersToSpawn)
             {
                 return;
@@ -158,6 +194,11 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             
             var target = Player.Get(RoleTypeId.ClassD).GetRandomValue();
             Instance.AddRole(target);
+            
+            Plugin.Coroutines.CallDelayed(Plugin.Scp575Config.CassieOnSpawnDelay, () =>
+            {
+                Plugin.Scp575Config.CassieOnSpawn.Speak();
+            });
         }
 
         /// <summary>
