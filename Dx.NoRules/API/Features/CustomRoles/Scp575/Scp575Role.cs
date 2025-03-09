@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dx.Core.API.Features;
+using Dx.NoRules.API.Extensions;
 using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Attributes;
+using Exiled.API.Features.Items;
 using Exiled.API.Features.Spawn;
 using Exiled.CustomRoles.API.Features;
 using Exiled.Events.EventArgs.Interfaces;
@@ -18,6 +20,7 @@ using PluginAPI.Events;
 using UnityEngine;
 using EventTargetPlayer = Exiled.Events.Handlers.Player;
 using EventTargetMap = Exiled.Events.Handlers.Map;
+using EventTargetServer = Exiled.Events.Handlers.Server;
 using Hint = HintServiceMeow.Core.Models.Hints.Hint;
 
 namespace Dx.NoRules.API.Features.CustomRoles.Scp575
@@ -25,6 +28,8 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
     [CustomRole(RoleTypeId.Scp106)]
     public class Scp575Role : CustomRole
     {
+        public static Scp575Role Instance { get; private set; }
+        
         private static readonly Dictionary<Player, Cooldown> _cooldowns = new();
 
         public override uint Id { get; set; } = 50;
@@ -51,16 +56,19 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
 
         protected override void SubscribeEvents()
         {
+            Instance = this;
+            
             SpawnChance = Plugin.Config.Scp575Config.SpawnChance;
             SpawnProperties.RoomSpawnPoints.Add(new RoomSpawnPoint
             {
-                Chance = SpawnChance,
+                Chance = 100,
                 Offset = Plugin.Config.Scp575Config.SpawnRoomOffset,
                 Room = Plugin.Config.Scp575Config.SpawnRoom
             });
 
             _targetHint = new Hint
             {
+                Id = "target-hint",
                 Content = new StringContent(Plugin.Scp575Config.DarkRoomHint.Text),
                 XCoordinate = Plugin.Scp575Config.DarkRoomHint.Position.x,
                 YCoordinate = Plugin.Scp575Config.DarkRoomHint.Position.y,
@@ -69,6 +77,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             
             _deathOnSurfaceHint = new Hint
             {
+                Id = "death-on-surface",
                 Content = new StringContent(Plugin.Scp575Config.DeathOnSurfaceHint.Text),
                 XCoordinate = Plugin.Scp575Config.DeathOnSurfaceHint.Position.x,
                 YCoordinate = Plugin.Scp575Config.DeathOnSurfaceHint.Position.y,
@@ -79,6 +88,11 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             EventTargetPlayer.InteractingDoor += CancelDoorOpenOnInteractingDoor;
             EventTargetPlayer.TogglingNoClip += ExecuteSafeAbilityOnTogglingNoClip;
             EventTargetPlayer.Hurting += CancelOtherDamagesOnHurting;
+            EventTargetPlayer.InteractingDoor += AllowOpenDoorsAndCheckpointsOnDoorInteracting;
+            EventTargetPlayer.Dying += PlayCassieAndRemoveHintsOnDying;
+            EventTargetPlayer.Died += RemoveHintOnDied;
+            
+            EventTargetServer.RoundStarted += SpawnScp575OnRoundStarted;
 
             EventTargetMap.ExplodingGrenade += TakeDamageFromFlashlightOnExplodingGrenade;
             EventTargetMap.GeneratorActivating += KillScp575OnGeneratorActivated;
@@ -92,6 +106,11 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             EventTargetPlayer.InteractingDoor -= CancelDoorOpenOnInteractingDoor;
             EventTargetPlayer.TogglingNoClip -= ExecuteSafeAbilityOnTogglingNoClip;
             EventTargetPlayer.Hurting -= CancelOtherDamagesOnHurting;
+            EventTargetPlayer.InteractingDoor -= AllowOpenDoorsAndCheckpointsOnDoorInteracting;
+            EventTargetPlayer.Dying -= PlayCassieAndRemoveHintsOnDying;
+            EventTargetPlayer.Died -= RemoveHintOnDied;
+            
+            EventTargetServer.RoundStarted -= SpawnScp575OnRoundStarted;
             
             EventTargetMap.ExplodingGrenade -= TakeDamageFromFlashlightOnExplodingGrenade;
             EventTargetMap.GeneratorActivating -= KillScp575OnGeneratorActivated;
@@ -104,9 +123,15 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             Timing.CallDelayed(0.75f, () =>
             {
                 player.ChangeAppearance(RoleTypeId.Scp106);
+
+                player.DisplayNickname = "Scp-575";
             });
-            
-            _cooldowns.Add(player, new Cooldown(Plugin.Scp575Config.SpecialAbilityCooldown));
+
+            if (!_cooldowns.ContainsKey(player))
+            {
+                _cooldowns.Add(player, new Cooldown(Plugin.Scp575Config.SpecialAbilityCooldown));  
+            }
+
             Plugin.Coroutines.Start($"{player.UserId}-dark-room-coroutine", DarkRoomCoroutine(player));
             
             base.RoleAdded(player);
@@ -114,11 +139,73 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
 
         protected override void RoleRemoved(Player player)
         {
+            player.DisplayNickname = null;
+            
             _cooldowns.Remove(player);
             
             base.RoleRemoved(player);
         }
 
+        /// <summary>
+        /// Заспавнить Scp-575
+        /// </summary>
+        private void SpawnScp575OnRoundStarted()
+        {
+            if (Player.List.Count < Plugin.Scp575Config.MinimumPlayersToSpawn)
+            {
+                return;
+            }
+            
+            var target = Player.Get(RoleTypeId.ClassD).GetRandomValue();
+            Instance.AddRole(target);
+        }
+
+        /// <summary>
+        /// Проиграть кэсси после смерти
+        /// </summary>
+        /// <param name="ev"></param>
+        private void PlayCassieAndRemoveHintsOnDying(DyingEventArgs ev)
+        {
+            if (!Check(ev.Player))
+            {
+                return;
+            }
+
+            if (ev.Player.CurrentRoom is not null)
+            {
+                foreach (var player in ev.Player.CurrentRoom.Players)
+                {
+                    var playerDisplay = PlayerDisplay.Get(player);
+                    playerDisplay.RemoveHint(_targetHint.Id);
+                }
+            }
+
+            Plugin.Scp575Config.CassieOnDeath.Speak();
+        }
+
+        /// <summary>
+        /// Открыть чекпойнт или дверь, даже если 575 не имеет доступ
+        /// </summary>
+        /// <param name="ev"></param>
+        private void AllowOpenDoorsAndCheckpointsOnDoorInteracting(InteractingDoorEventArgs ev)
+        {
+            if (ev.Door.IsGate || ev.Door.IsElevator || (ev.Door.IsLocked && ev.Door.DoorLockType is not DoorLockType.AdminCommand))
+            {
+                return;
+            }
+            
+            if (!Check(ev.Player))
+            {
+                return;
+            }
+
+            ev.IsAllowed = true;
+        } 
+        
+        /// <summary>
+        /// Убить 575 если все генераторы 
+        /// </summary>
+        /// <param name="ev"></param>
         private void KillScp575OnGeneratorActivated(GeneratorActivatingEventArgs ev)
         {
             if (!ev.IsAllowed)
@@ -181,7 +268,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
                 return;
             }
 
-            if (ev.DamageHandler.Type is DamageType.MicroHid or DamageType.Decontamination or DamageType.Custom)
+            if (ev.DamageHandler.Type is DamageType.MicroHid or DamageType.Decontamination or DamageType.Falldown or DamageType.Custom)
             {
                 return;
             }
@@ -240,6 +327,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
 
             foreach (var door in ev.Player.CurrentRoom.Doors)
             {
+                door.IsOpen = false;
                 door.Lock(Plugin.Scp575Config.SpecialAbilityDoorLockTime, DoorLockType.AdminCommand);
             }
 
@@ -257,12 +345,10 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
                 return;
             }
 
-            if (!ev.Door.Type.IsElevator() && !ev.Door.Type.IsGate())
+            if (ev.Door.IsElevator || ev.Door.IsGate)
             {
-                return;
+                ev.IsAllowed = false;
             }
-            
-            ev.IsAllowed = false;
         }
         /// <summary>
         /// Отменить подбирание предмета если игрок 575
@@ -271,6 +357,16 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
         private void CancelPickingUpOnPickingUp(PickingUpItemEventArgs ev)
         {
             CancelEventIfScp575(ev.Player, ev);
+        }
+
+        /// <summary>
+        /// Удалить хинт при смерти
+        /// </summary>
+        /// <param name="ev"></param>
+        private void RemoveHintOnDied(DiedEventArgs ev)
+        {
+            var playerDisplay = PlayerDisplay.Get(ev.Player);
+            playerDisplay.RemoveHint(_targetHint);
         }
 
         /// <summary>
@@ -288,6 +384,11 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             deniableEvent.IsAllowed = false;
         }
 
+        /// <summary>
+        /// Корутина нанесения и выключения свет в комнате
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
         private IEnumerator<float> DarkRoomCoroutine(Player player)
         {
             var targetRoom = player.CurrentRoom;
@@ -298,6 +399,12 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
 
             while (player.IsConnected && Round.InProgress && Check(player))
             {
+                if (player.CurrentRoom is null)
+                {
+                    yield return Timing.WaitForSeconds(1f);
+                    continue;
+                }
+                
                 if (targetRoom != player.CurrentRoom)
                 {
                     //Включаем свет
@@ -317,11 +424,11 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
                     var merged = new List<Player>(player.CurrentRoom.Players.Count() + lastPlayers.Count());
                     merged.AddRange(player.CurrentRoom.Players);
                     merged.AddRange(lastPlayers);
-
+                    
                     foreach (var target in merged)
                     {
                         var playerDisplay = PlayerDisplay.Get(target);
-                        playerDisplay.RemoveHint(_targetHint);
+                        playerDisplay.RemoveHint(_targetHint.Id);
                     }
 
                     targetRoom = player.CurrentRoom;
@@ -332,42 +439,43 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
                         player.SendFakeSyncVar(targetRoom.RoomLightControllerNetIdentity, typeof(RoomLightController), nameof(RoomLightController.NetworkLightsEnabled), true);
                     });
 
-                    lastPlayers = player.CurrentRoom.Players;
-
+                    // Обновляем список игроков для новой комнаты
+                    lastPlayers = targetRoom.Players.ToList();
                     continue;
                 }
 
-                var except = targetRoom.Players.Except(lastPlayers);
+                // Определяем игроков, которые только что вошли в комнату
+                var newPlayers = targetRoom.Players.Except(lastPlayers).ToList();
+                // Определяем игроков, которые покинули комнату
+                var leavers = lastPlayers.Except(targetRoom.Players).ToList();
 
-                foreach (var leaved in except)
+                // Для вновь вошедших добавляем хинт
+                foreach (var newPlayer in newPlayers)
                 {
-                    var playerDisplay = PlayerDisplay.Get(leaved);
-
-                    if (leaved.CurrentRoom == targetRoom)
-                    {
-                        playerDisplay.AddHint(_targetHint);
-                    }
-                    else
-                    {
-                        playerDisplay.RemoveHint(_targetHint);
-                    }
+                    var playerDisplay = PlayerDisplay.Get(newPlayer);
+                    playerDisplay.AddHintIfNotExists(_targetHint);
+                }
+                // Для покинувших удаляем хинт
+                foreach (var leaver in leavers)
+                {
+                    var playerDisplay = PlayerDisplay.Get(leaver);
+                    playerDisplay.RemoveHint(_targetHint);
                 }
 
+                // Обрабатываем всех игроков, находящихся в текущей комнате
                 foreach (var target in targetRoom.Players)
                 {
                     if (target.IsScp || target == player)
-                    {
                         continue;
-                    }
-                        
+            
                     var playerDisplay = PlayerDisplay.Get(target);
-                    playerDisplay.AddHint(_targetHint);
-                        
-                    target.Hurt(player, damage, DamageType.Bleeding, deathText: null);
+                    playerDisplay.AddHintIfNotExists(_targetHint);
+                    
+                    target.Hurt(player, damage, DamageType.Custom, deathText: "Вас убила тьма");
                 }
 
-                lastPlayers = targetRoom.Players;
-
+                // Обновляем список игроков для следующей итерации
+                lastPlayers = targetRoom.Players.ToList();
                 yield return Timing.WaitForSeconds(1f);
             }
             
@@ -384,10 +492,15 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             }
         }
 
+        /// <summary>
+        /// Корутина нанесения урона на улице Scp-575
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
         private IEnumerator<float> DeathOnSurfaceCoroutine(Player player)
         {
             var playerDisplay = PlayerDisplay.Get(player);
-            playerDisplay.AddHint(_deathOnSurfaceHint);
+            playerDisplay.AddHintIfNotExists(_deathOnSurfaceHint);
 
             while (player.IsAlive && Check(player))
             {

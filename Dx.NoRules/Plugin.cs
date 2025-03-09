@@ -68,6 +68,8 @@ namespace Dx.NoRules
 
         public override void OnDisabled()
         {
+            ProximityChat.Toggled.Clear();
+            
             SniperRifleItem.Unregister();
             _scp575Role.Unregister();
             

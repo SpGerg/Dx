@@ -13,8 +13,6 @@ public abstract class AudioBot
     static AudioBot()
     {
         Startup.SetupDependencies();
-
-        AudioPlayerBase.OnFinishedTrack += HideNpcAfterEnding;
     }
 
     public static void DisconnectAllDummies()
@@ -27,16 +25,6 @@ public abstract class AudioBot
         _audioBots.Clear();
     }
 
-    private static void HideNpcAfterEnding(AudioPlayerBase audioPlayerBase, string track, bool directPlay, ref int nextQueue)
-    {
-        if (!_audioBots.ContainsKey(audioPlayerBase.Owner.PlayerId))
-        {
-            return;
-        }
-        
-        audioPlayerBase.Owner.roleManager.ServerSetRole(RoleTypeId.Overwatch, RoleChangeReason.None);
-    }
-    
     public static Dictionary<int, AudioBot> AudioBots => _audioBots;
 
     internal static readonly Dictionary<int, AudioBot> _audioBots = new();

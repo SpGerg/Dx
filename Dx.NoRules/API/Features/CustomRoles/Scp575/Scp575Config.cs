@@ -54,5 +54,15 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575Role
         
         [Description("Шанс спавна")]
         public float SpawnChance { get; set; } = 50f;
+        
+        [Description("Кэсси при смерти")]
+        public CassieMessage CassieOnDeath { get; set; } = new()
+        {
+            Message = "SCP 575 dead",
+            Translation = "SCP-575 умер"
+        };
+
+        [Description("Минимальное кол-во игроков для спавна")]
+        public int MinimumPlayersToSpawn { get; set; } = 5;
     }
 }

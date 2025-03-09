@@ -102,6 +102,7 @@
         <Reference Include="System.Xml" />
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="API\Extensions\PlayerDisplayExtensions.cs" />
         <Compile Include="API\Extensions\PlayerExtensions.cs" />
         <Compile Include="API\Features\CustomItems\SniperRifle\Hints\SniperRifleHint.cs" />
         <Compile Include="API\Features\CustomItems\SniperRifle\SniperRifleItem.cs" />

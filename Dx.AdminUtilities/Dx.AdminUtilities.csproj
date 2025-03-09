@@ -89,7 +89,6 @@
     <ItemGroup>
         <Compile Include="Commands\Admin\Jail.cs" />
         <Compile Include="Commands\Admin\Norma.cs" />
-        <Compile Include="Commands\Admin\Size.cs" />
         <Compile Include="Config.cs" />
         <Compile Include="Events\Internal\Player.cs" />
         <Compile Include="Events\Internal\Server.cs" />

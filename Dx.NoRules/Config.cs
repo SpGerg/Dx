@@ -115,12 +115,28 @@ namespace Dx.NoRules
         public float SniperRifleDamage { get; set; } = 30;
         
         [Description("Перезарядка снайперской винтовки")]
-        public float SniperRifleCooldown { get; set; } = 10; 
+        public float SniperRifleCooldown { get; set; } = 10;
+
+        [Description("Бесконечные ли патроны")]
+        public bool IsInfinityAmmo { get; set; } = true;
+        
+        [Description("Бесконечные ли патроны")]
+        public bool IsInfinityRadio { get; set; } = true;
+
+        [Description("Сообщение когда игрок был доспавнен")]
+        public HintSettings RespawnedAfterDieHint { get; set; } = new()
+        {
+            Enabled = true,
+            Text = "Вы были доспавнены за %team%",
+            Duration = 3,
+            Position = new Vector2(0, 300),
+            Size = 24
+        };
         
         public HintSettings SniperRifleHint { get; set; } = new()
         {
             Position = new Vector2(0, 700),
             Size = 32
-        }; 
+        };
     }
 }

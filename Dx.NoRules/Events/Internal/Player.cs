@@ -1,14 +1,20 @@
 using System;
 using System.Collections.Generic;
 using Dx.NoRules.API.Extensions;
+using Dx.NoRules.API.Features.CustomRoles.Scp575;
 using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
+using Exiled.CustomRoles.API.Features;
 using Exiled.Events.EventArgs.Player;
+using HintServiceMeow.Core.Models.HintContent;
+using HintServiceMeow.Core.Models.Hints;
+using HintServiceMeow.Core.Utilities;
 using PlayerRoles;
 using Respawning.Waves;
 using EventTarget = Exiled.Events.Handlers.Player;
+using Hint = HintServiceMeow.Core.Models.Hints.Hint;
 using KeycardPermissions = Interactables.Interobjects.DoorUtils.KeycardPermissions;
 
 namespace Dx.NoRules.Events.Internal
@@ -28,6 +34,7 @@ namespace Dx.NoRules.Events.Internal
             EventTarget.ActivatingWarheadPanel += OpenWarheadIfHasPermissionOnActivatingWarheadPanel;
             EventTarget.InteractingLocker += OpenLockerIfHasPermissionOnInteractingLocker;
             EventTarget.UnlockingGenerator += OpenGeneratorIfHasPermissionOnUnlockingGenerator;
+            EventTarget.DroppingAmmo += CancelDropAmmoOnDroppingAmmo;
         }
         
         public static void Unregister()
@@ -41,8 +48,23 @@ namespace Dx.NoRules.Events.Internal
             EventTarget.ActivatingWarheadPanel -= OpenWarheadIfHasPermissionOnActivatingWarheadPanel;
             EventTarget.InteractingLocker -= OpenLockerIfHasPermissionOnInteractingLocker;
             EventTarget.UnlockingGenerator -= OpenGeneratorIfHasPermissionOnUnlockingGenerator;
+            EventTarget.DroppingAmmo -= CancelDropAmmoOnDroppingAmmo;
         }
 
+        /// <summary>
+        /// Отменить выброску патронов
+        /// </summary>
+        /// <param name="ev"></param>
+        private static void CancelDropAmmoOnDroppingAmmo(DroppingAmmoEventArgs ev)
+        {
+            if (Plugin.Config.IsInfinityAmmo)
+            {
+                return;
+            }
+            
+            ev.IsAllowed = false;
+        }
+        
         /// <summary>
         /// Деактивирует теслу если она выключена
         /// </summary>
@@ -63,6 +85,11 @@ namespace Dx.NoRules.Events.Internal
         /// <param name="ev"></param>
         private static void RefillAmmoOnReloadingWeapon(ReloadingWeaponEventArgs ev)
         {
+            if (!Plugin.Config.IsInfinityAmmo)
+            {
+                return;
+            }
+            
             ev.Player.SetAmmo(ev.Firearm.AmmoType, (ushort) (ev.Firearm.TotalMaxAmmo + 1));
         }
         
@@ -72,6 +99,11 @@ namespace Dx.NoRules.Events.Internal
         /// <param name="ev"></param>
         private static void RefillAmmoOnChangingItem(ChangingItemEventArgs ev)
         {
+            if (!Plugin.Config.IsInfinityAmmo)
+            {
+                return;
+            }
+            
             if (ev.Item is not Firearm firearm)
             {
                 return;
@@ -94,6 +126,11 @@ namespace Dx.NoRules.Events.Internal
                 return;
             }
             */
+
+            if (Scp575Role.Instance.Check(ev.Player))
+            {
+                return;
+            }
             
             if (ev.IsAllowed ||
                 !ev.Player.HasKeycardPermission(ev.Door.RequiredPermissions.RequiredPermissions))
@@ -185,16 +222,38 @@ namespace Dx.NoRules.Events.Internal
             {
                 return;
             }
+
+            var team = string.Empty;
             
             switch (Plugin.LastSpawnedWave)
             {
                 case NtfSpawnWave:
+                    team = "НТФ";
+                    
                     ev.Player.Role.Set(Plugin.Config.NtfRoles.GetRandomValue(), SpawnReason.Respawn);
                     break;
                 case ChaosSpawnWave:
+                    team = "хаос";
+                    
                     ev.Player.Role.Set(Plugin.Config.ChaosRoles.GetRandomValue(), SpawnReason.Respawn);
                     break;
             }
+
+            var hint = new Hint
+            {
+                Content = new StringContent(Plugin.Config.RespawnedAfterDieHint.Text.Replace("%team%", team)),
+                XCoordinate = Plugin.Config.RespawnedAfterDieHint.Position.x,
+                YCoordinate = Plugin.Config.RespawnedAfterDieHint.Position.y,
+                FontSize = Plugin.Config.RespawnedAfterDieHint.Size
+            };
+
+            var playerDisplay = PlayerDisplay.Get(ev.Player);
+            playerDisplay.AddHint(hint);
+            
+            Plugin.Coroutines.CallDelayed(Plugin.Config.RespawnedAfterDieHint.Duration, () =>
+            {
+               playerDisplay.RemoveHint(hint); 
+            });
         }
 
         /// <summary>
@@ -203,6 +262,11 @@ namespace Dx.NoRules.Events.Internal
         /// <param name="ev"></param>
         private static void CancelBatteryDecreaseOnUsingRadioBattery(UsingRadioBatteryEventArgs ev)
         {
+            if (!Plugin.Config.IsInfinityRadio)
+            {
+                return;
+            }
+
             ev.IsAllowed = false;
         }
     }

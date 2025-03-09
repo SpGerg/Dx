@@ -1,4 +1,5 @@
 using System.IO;
+using Dx.Core.API.Features.Audio.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Components;
 using MEC;
@@ -48,6 +49,8 @@ public class BasicAudioBot : AudioBot
         
         Base.Enqueue(Path.Combine(Plugin.AudiosFilepath, AudioSettings.Filepath), -1);
         Base.Play(0);
+
+        Timing.CallDelayed(AudioSettings.GetAudioDuration(), Disconnect);
     }
 
     public override bool Stop()

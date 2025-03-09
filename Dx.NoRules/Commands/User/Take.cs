@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Dx.NoRules.Commands.User
 {
-    [CommandHandler(typeof(ClientCommandHandler))]
+    //[CommandHandler(typeof(ClientCommandHandler))]
     public class Take : CommandBase
     {
         public override string Command => "take";

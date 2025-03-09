@@ -27,7 +27,7 @@ public class PlayerSnapshot
     }
     
     public RoleTypeId Role { get; }
-    
+
     public ItemType[] Items { get; }
     
     public Vector3 Position { get; }

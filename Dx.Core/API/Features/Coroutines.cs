@@ -11,6 +11,11 @@ public class Coroutines
 
     public void Start(string id, IEnumerator<float> coroutine)
     {
+        if (_coroutines.TryGetValue(id, out var value))
+        {
+            Stop(id);
+        }
+        
         _coroutines.Add(id, Timing.RunCoroutine(coroutine));
     }
 

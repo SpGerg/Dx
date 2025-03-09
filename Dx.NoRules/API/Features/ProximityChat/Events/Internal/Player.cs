@@ -24,6 +24,10 @@ namespace Dx.NoRules.API.Features.ProximityChat.Events.Internal
             EventTarget.VoiceChatting -= SendProximityMessageOnVoiceChatting;
         }
 
+        /// <summary>
+        /// Переключить чат сцп на Alt
+        /// </summary>
+        /// <param name="ev"></param>
         private static void ToggleVoiceOnTogglingNoСlip(TogglingNoClipEventArgs ev)
         {
             if (ev.Player.IsNoclipPermitted)
@@ -70,38 +74,64 @@ namespace Dx.NoRules.API.Features.ProximityChat.Events.Internal
             }
         }
 
+        /// <summary>
+        /// Отправить сообщение если сцп говорит в чат людей
+        /// </summary>
+        /// <param name="ev"></param>
         private static void SendProximityMessageOnVoiceChatting(VoiceChattingEventArgs ev)
         {
-            if (ev.VoiceMessage.Channel != VoiceChatChannel.ScpChat)
+            if (ev.VoiceMessage.Channel is not VoiceChatChannel.ScpChat)
+            {
                 return;
-        
+            }
+
             if (!ReferenceHub.TryGetHubNetID(ev.Player.Connection.identity.netId, out var player))
+            {
                 return;
-        
-            if (!Plugin.Config.ProximityChatRoles.Contains(player.roleManager.CurrentRole.RoleTypeId) || !Plugin.ProximityChat.Toggled.ContainsKey(ev.Player))
+            }
+
+            if (!Plugin.Config.ProximityChatRoles.Contains(player.roleManager.CurrentRole.RoleTypeId) ||
+                !Plugin.ProximityChat.Toggled.TryGetValue(ev.Player, out var toggle))
+            {
                 return;
+            }
         
             SendProximityMessage(ev.VoiceMessage);
+
+            ev.IsAllowed = !toggle;
         }
         
-        private static void SendProximityMessage(VoiceMessage msg)
+        /// <summary>
+        /// Отправиь сообщение ближайщим игрокам
+        /// </summary>
+        /// <param name="message"></param>
+        private static void SendProximityMessage(VoiceMessage message)
         {
             foreach (var player in Exiled.API.Features.Player.List)
             {
-                if (player.Role is SpectatorRole && !msg.Speaker.IsSpectatedBy(player.ReferenceHub))
+                if (player.Role is SpectatorRole && !message.Speaker.IsSpectatedBy(player.ReferenceHub))
+                {
                     continue;
-                
-                if (player.Role is not IVoiceRole voiceRole2)
-                    continue;
-            
-                if (Vector3.Distance(msg.Speaker.transform.position, player.Position) >= Plugin.Config.ProximityChatDistance)
-                    continue;
+                }
 
-                if (voiceRole2.VoiceModule.ValidateReceive(msg.Speaker, VoiceChatChannel.Proximity) is VoiceChatChannel.None)
+                if (player.Role is not IVoiceRole voiceRole2)
+                {
                     continue;
+                }
+
+                if (Vector3.Distance(message.Speaker.transform.position, player.Position) >=
+                    Plugin.Config.ProximityChatDistance)
+                {
+                    continue;
+                }
+
+                if (voiceRole2.VoiceModule.ValidateReceive(message.Speaker, VoiceChatChannel.Proximity) is VoiceChatChannel.None)
+                {
+                    continue;
+                }
             
-                msg.Channel = VoiceChatChannel.Proximity;
-                player.Connection.Send(msg);
+                message.Channel = VoiceChatChannel.Proximity;
+                player.Connection.Send(message);
             }
         }
     }
