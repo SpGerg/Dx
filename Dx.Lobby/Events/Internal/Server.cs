@@ -41,6 +41,15 @@ namespace Dx.Lobby.Events.Internal
             
             if (!Plugin.IsUsingSchematic)
             {
+                var room = Room.Get(Plugin.Config.SpawnRoomType);
+
+                foreach (var door in room.Doors)
+                {
+                    door.Lock(DoorLockType.AdminCommand);
+                }
+
+                Plugin.SpawnPosition = room.WorldPosition(Plugin.Config.RoomOffset);
+                
                 return;
             }
             
@@ -52,18 +61,13 @@ namespace Dx.Lobby.Events.Internal
             }
 
             Timing.RunCoroutine(SchematicSpawnCoroutine(schematicInfo, data));
-
-            foreach (var door in Door.List)
-            {
-                door.Lock(DoorLockType.AdminCommand);                
-            }
         }
 
         private static void DisableGodModeOnRoundStarted()
         {
             foreach (var player in Exiled.API.Features.Player.List)
             {
-                if (player.IsNPC)
+                if (player.IsNPC || player.ReferenceHub.playerStats is null)
                 {
                     continue;
                 }
@@ -93,11 +97,13 @@ namespace Dx.Lobby.Events.Internal
 
         private static IEnumerator<float> SchematicSpawnCoroutine(LobbySchematicSerializable serializable, SchematicObjectDataList data)
         {
+            Plugin.SpawnPosition = serializable.Position;
+            
             while (MapEditorReborn.API.API.ObjectPrefabs is null)
             {
                 yield return Timing.WaitForSeconds(Timing.WaitForOneFrame);
             }
-                
+
             Plugin.SchematicObject = ObjectSpawner.SpawnSchematic(serializable.SchematicName, serializable.Position, Quaternion.identity, Vector3.one, data, true);
             MapEditorReborn.API.API.SpawnedObjects.Add(Plugin.SchematicObject);
         }

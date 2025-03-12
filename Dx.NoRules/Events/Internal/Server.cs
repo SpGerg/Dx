@@ -66,6 +66,9 @@ namespace Dx.NoRules.Events.Internal
         private static void ClearCoroutinesOnWaitingForPlayers()
         {
             Plugin.Coroutines.Clear();
+            
+            Plugin.LastSpawnedTime = DateTime.Now;
+            Plugin.LastSpawnedWave = null;
         }
     }
 }

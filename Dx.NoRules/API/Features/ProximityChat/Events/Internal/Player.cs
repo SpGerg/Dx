@@ -1,3 +1,5 @@
+using Dx.NoRules.API.Features.CustomRoles.Scp575;
+using Exiled.API.Features;
 using Exiled.API.Features.Roles;
 using Exiled.Events.EventArgs.Player;
 using HintServiceMeow.Core.Utilities;
@@ -85,6 +87,11 @@ namespace Dx.NoRules.API.Features.ProximityChat.Events.Internal
                 return;
             }
 
+            if (Scp575Role.Instance.Check(ev.Player))
+            {
+                return;
+            }
+            
             if (!ReferenceHub.TryGetHubNetID(ev.Player.Connection.identity.netId, out var player))
             {
                 return;
@@ -95,7 +102,7 @@ namespace Dx.NoRules.API.Features.ProximityChat.Events.Internal
             {
                 return;
             }
-        
+            
             SendProximityMessage(ev.VoiceMessage);
 
             ev.IsAllowed = !toggle;

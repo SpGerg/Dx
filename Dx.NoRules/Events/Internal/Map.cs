@@ -22,7 +22,7 @@ namespace Dx.NoRules.Events.Internal
         /// <param name="ev"></param>
         private static void CancelAmmoSpawnOnPickupAdded(PickupAddedEventArgs ev)
         {
-            if (!ev.Pickup.Type.IsAmmo())
+            if (!Plugin.Config.IsDestroyAmmo || !ev.Pickup.Type.IsAmmo())
             {
                 return;
             }

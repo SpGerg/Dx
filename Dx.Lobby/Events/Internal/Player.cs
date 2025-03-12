@@ -43,25 +43,7 @@ namespace Dx.Lobby.Events.Internal
             player.Role.Set(Plugin.Config.LobbyRole);
             player.IsGodModeEnabled = true;
 
-            Vector3 position;
-            
-            if (Plugin.IsUsingSchematic)
-            {
-                position = Plugin.SelectedSchematic.SpawnPosition;
-            }
-            else
-            {
-                var room = Room.Get(Plugin.Config.SpawnRoomType);
-
-                foreach (var door in room.Doors)
-                {
-                    door.Lock(DoorLockType.AdminCommand);
-                }
-
-                position = room.WorldPosition(Plugin.Config.RoomOffset);
-            }
-
-            player.Teleport(position);
+            player.Teleport(Plugin.SpawnPosition);
 
             var playerDisplay = PlayerDisplay.Get(player);
             

@@ -120,6 +120,9 @@ namespace Dx.NoRules
         [Description("Бесконечные ли патроны")]
         public bool IsInfinityAmmo { get; set; } = true;
         
+        [Description("Удалять ли патроны")]
+        public bool IsDestroyAmmo { get; set; }
+        
         [Description("Бесконечные ли патроны")]
         public bool IsInfinityRadio { get; set; } = true;
 

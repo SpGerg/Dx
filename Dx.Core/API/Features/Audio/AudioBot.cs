@@ -53,7 +53,7 @@ public abstract class AudioBot
         
         _audioBots.Remove(Npc.Id);
         
-        NetworkServer.Destroy(Npc.GameObject);
+        Npc.Disconnect();
         Base.Stoptrack(true);
 
         Npc = null;

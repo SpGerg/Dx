@@ -19,6 +19,7 @@ using MEC;
 using PlayerRoles;
 using PluginAPI.Events;
 using UnityEngine;
+using VoiceChat;
 using EventTargetPlayer = Exiled.Events.Handlers.Player;
 using EventTargetMap = Exiled.Events.Handlers.Map;
 using EventTargetServer = Exiled.Events.Handlers.Server;
@@ -26,7 +27,7 @@ using Hint = HintServiceMeow.Core.Models.Hints.Hint;
 
 namespace Dx.NoRules.API.Features.CustomRoles.Scp575
 {
-    [CustomRole(RoleTypeId.Scp106)]
+    [CustomRole(RoleTypeId.Tutorial)]
     public class Scp575Role : CustomRole
     {
         public static Scp575Role Instance { get; private set; }
@@ -126,6 +127,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             Timing.CallDelayed(0.75f, () =>
             {
                 player.ChangeAppearance(RoleTypeId.Scp106);
+                player.VoiceChannel = VoiceChatChannel.ScpChat;
 
                 player.DisplayNickname = "Scp-575";
             });
@@ -187,7 +189,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
                 return;
             }
             
-            if (Player.List.Count < Plugin.Scp575Config.MinimumPlayersToSpawn)
+            if (Player.Get(RoleTypeId.Scp106).Any() || Player.List.Count < Plugin.Scp575Config.MinimumPlayersToSpawn)
             {
                 return;
             }
@@ -493,6 +495,9 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
                 // Для вновь вошедших добавляем хинт
                 foreach (var newPlayer in newPlayers)
                 {
+                    if (newPlayer.IsScp || newPlayer == player)
+                        continue;
+                    
                     var playerDisplay = PlayerDisplay.Get(newPlayer);
                     playerDisplay.AddHintIfNotExists(_targetHint);
                 }

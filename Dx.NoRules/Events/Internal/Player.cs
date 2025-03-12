@@ -57,7 +57,7 @@ namespace Dx.NoRules.Events.Internal
         /// <param name="ev"></param>
         private static void CancelDropAmmoOnDroppingAmmo(DroppingAmmoEventArgs ev)
         {
-            if (Plugin.Config.IsInfinityAmmo)
+            if (!Plugin.Config.IsInfinityAmmo)
             {
                 return;
             }
@@ -126,18 +126,13 @@ namespace Dx.NoRules.Events.Internal
                 return;
             }
             */
-
-            if (Scp575Role.Instance.Check(ev.Player))
-            {
-                return;
-            }
             
-            if (ev.IsAllowed ||
+            if (ev.Door.IsLocked || ev.IsAllowed ||
                 !ev.Player.HasKeycardPermission(ev.Door.RequiredPermissions.RequiredPermissions))
             {
                 return;
             }
-            
+
             ev.IsAllowed = true;
         }
         
@@ -172,7 +167,7 @@ namespace Dx.NoRules.Events.Internal
             */
             
             if (ev.IsAllowed ||
-                !ev.Player.HasKeycardPermission(ev.InteractingChamber.Base.RequiredPermissions))
+                !ev.Player.HasKeycardPermission(ev.InteractingChamber.Base.RequiredPermissions, true))
             {
                 return;
             }
@@ -201,7 +196,7 @@ namespace Dx.NoRules.Events.Internal
         /// <param name="ev"></param>
         private static void SpawnPlayerInTeamOnVerified(VerifiedEventArgs ev)
         {
-            if (!Round.InProgress)
+            if (!Round.InProgress || Plugin.LastSpawnedWave is null)
             {
                 return;
             }

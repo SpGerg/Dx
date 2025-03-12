@@ -67,6 +67,7 @@ namespace Dx.NoRules.API.Features.CustomItems.SniperRifle
             base.SubscribeEvents();
         }
 
+        /*
         protected override void OnShooting(ShootingEventArgs ev)
         {
             if (!ev.IsAllowed)
@@ -88,5 +89,6 @@ namespace Dx.NoRules.API.Features.CustomItems.SniperRifle
 
             base.OnShooting(ev);
         }
+        */
     }
 }

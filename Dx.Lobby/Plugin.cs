@@ -6,6 +6,7 @@ using Exiled.API.Features;
 using HarmonyLib;
 using HintServiceMeow.Core.Models.Hints;
 using MapEditorReborn.API.Features.Objects;
+using UnityEngine;
 using Hint = HintServiceMeow.Core.Models.Hints.Hint;
 
 namespace Dx.Lobby
@@ -18,6 +19,8 @@ namespace Dx.Lobby
 
         public static bool IsUsingSchematic => Config.SpawnRoomType is RoomType.Unknown;
         
+        public static Vector3 SpawnPosition { get; internal set; }
+
         public static LobbySchematicSerializable SelectedSchematic { get; internal set; }
         
         public static SchematicObject SchematicObject { get; internal set; }
