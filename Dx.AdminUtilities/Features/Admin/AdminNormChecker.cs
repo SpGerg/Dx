@@ -37,8 +37,6 @@ public class AdminNormChecker
         }
         
         File.WriteAllText(_daysToSendNormPath,  JsonConvert.SerializeObject(DateTime.Now));
-        
-        Plugin.AdminRepository.Clear();
 
         var stringBuilder = StringBuilderPool.Pool.Get();
         
@@ -50,5 +48,7 @@ public class AdminNormChecker
         var content = StringBuilderPool.Pool.ToStringReturn(stringBuilder);
         
         Core.Plugin.Webhook.Send(Plugin.Config.NormWebhook, content, WebhookEventType.Info);
+
+        Plugin.AdminRepository.Clear();
     }
 }

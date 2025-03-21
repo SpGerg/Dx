@@ -50,13 +50,17 @@ public abstract class AudioBot
         {
             return;
         }
-        
-        _audioBots.Remove(Npc.Id);
-        
+
         Npc.Disconnect();
         Base.Stoptrack(true);
+        
+        NetworkServer.Destroy(Npc.GameObject);
+
+        _audioBots.Remove(Npc.Id);
 
         Npc = null;
         Base = null;
+        
+        Log.Info(Npc);
     }
 }

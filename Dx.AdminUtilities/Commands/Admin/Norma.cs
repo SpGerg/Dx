@@ -7,6 +7,7 @@ using Exiled.API.Features.Pools;
 namespace Dx.AdminUtilities.Commands.Admin;
 
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
+[CommandHandler(typeof(GameConsoleCommandHandler))]
 public class Norma : CommandBase
 {
     public override string Command => "norma";

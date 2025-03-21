@@ -47,9 +47,9 @@ public class BasicAudioBot : AudioBot
         
         _audioBots.Add(Npc.Id, this);
         
-        Base.Enqueue(Path.Combine(Plugin.AudiosFilepath, AudioSettings.Filepath), -1);
+        Base.Enqueue(AudioSettings.GetFullPath(), -1);
         Base.Play(0);
-
+        
         Timing.CallDelayed(AudioSettings.GetAudioDuration(), Disconnect);
     }
 

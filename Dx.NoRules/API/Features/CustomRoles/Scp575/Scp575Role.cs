@@ -95,6 +95,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             EventTargetPlayer.InteractingDoor += AllowOpenDoorsAndCheckpointsOnDoorInteracting;
             EventTargetPlayer.Dying += PlayCassieAndRemoveHintsOnDying;
             EventTargetPlayer.Died += RemoveHintOnDied;
+            EventTargetPlayer.Left += RemoveDisplayNicknameOnLeft;
             
             EventTargetServer.RoundStarted += SpawnScp575OnRoundStarted;
 
@@ -113,6 +114,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             EventTargetPlayer.InteractingDoor -= AllowOpenDoorsAndCheckpointsOnDoorInteracting;
             EventTargetPlayer.Dying -= PlayCassieAndRemoveHintsOnDying;
             EventTargetPlayer.Died -= RemoveHintOnDied;
+            EventTargetPlayer.Left -= RemoveDisplayNicknameOnLeft;
             
             EventTargetServer.RoundStarted -= SpawnScp575OnRoundStarted;
             
@@ -411,6 +413,15 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             var playerDisplay = PlayerDisplay.Get(ev.Player);
             playerDisplay.RemoveHint(_targetHint);
         }
+        
+        /// <summary>
+        /// Удалить видимый никнейм 575
+        /// </summary>
+        /// <param name="ev"></param>
+        private void RemoveDisplayNicknameOnLeft(LeftEventArgs ev)
+        {
+            ev.Player.DisplayNickname = null;
+        }
 
         /// <summary>
         /// Отменить ивент если роль Scp575
@@ -426,7 +437,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
 
             deniableEvent.IsAllowed = false;
         }
-
+        
         /// <summary>
         /// Корутина нанесения и выключения свет в комнате
         /// </summary>
@@ -517,7 +528,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
                     var playerDisplay = PlayerDisplay.Get(target);
                     playerDisplay.AddHintIfNotExists(_targetHint);
                     
-                    target.Hurt(player, damage, DamageType.Custom, deathText: "Вас убила тьма");
+                    target.Hurt(damage, DamageType.Custom);
                 }
 
                 // Обновляем список игроков для следующей итерации

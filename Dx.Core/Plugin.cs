@@ -1,5 +1,6 @@
 using System.IO;
 using Dx.Core.API.Features.Webhooks;
+using Exiled.API.Enums;
 using Exiled.API.Features;
 
 namespace Dx.Core;
@@ -13,6 +14,8 @@ public class Plugin : Plugin<Config>
     public static Webhook Webhook { get; private set; }
     
     public static string AudiosFilepath { get; private set; }
+    
+    public override PluginPriority Priority => PluginPriority.First;
 
     public override void OnEnabled()
     {

@@ -24,7 +24,7 @@ namespace Dx.NoRules.Commands.User
 
         public override CommandParameter[] Parameters { get; } = Array.Empty<CommandParameter>();
 
-        private const int _percent = 1000;
+        private const int _percent = 100;
         
         public override CommandResponse Execute(CommandContext context)
         {
@@ -46,7 +46,7 @@ namespace Dx.NoRules.Commands.User
                 };
             }
 
-            if ((scp106Role.Vigor * _percent) < Plugin.Config.StalkVigorCost)
+            if (Plugin.Config.StalkVigorCost > (scp106Role.Vigor * _percent))
             {
                 return new CommandResponse
                 {
@@ -66,7 +66,7 @@ namespace Dx.NoRules.Commands.User
             {
                 return new CommandResponse
                 {
-                    Response = $"Способность на перезарядке, осталось: {cooldown.RemainingTime}",
+                    Response = $"Способность на перезарядке, осталось: {(int) cooldown.RemainingTime}",
                     Success = false
                 };
             }
@@ -84,8 +84,10 @@ namespace Dx.NoRules.Commands.User
                 };
             }
 
-            scp106Role.Vigor -= Plugin.Config.StalkVigorCost;
+            scp106Role.Vigor -= Plugin.Config.StalkVigorCost / _percent;
             scp106Role.UsePortal(target.Position);
+            
+            cooldown.ForceUse();
             
             return CommandResponse.Successful;
         }

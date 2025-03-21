@@ -1,12 +1,15 @@
 using System;
+using System.Linq;
 using CommandSystem;
 using Dx.AdminUtilities.Features.Jail;
 using Dx.Core.API.Extensions;
 using Dx.Core.API.Features.Commands;
+using Exiled.API.Features;
 
 namespace Dx.AdminUtilities.Commands.Admin;
 
 [CommandHandler(typeof(RemoteAdminCommandHandler))]
+[CommandHandler(typeof(GameConsoleCommandHandler))]
 public class Jail : CommandBase
 {
     public override string Command => "jail";
@@ -32,7 +35,7 @@ public class Jail : CommandBase
 
     public override CommandResponse Execute(CommandContext context)
     {
-        if (!context.TryGetPlayersOrPlayer(context.Get("id"), out var players))
+        if (!context.TryGetPlayersOrPlayer("id", out var players))
         {
             return new CommandResponse
             {
