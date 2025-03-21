@@ -96,6 +96,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             EventTargetPlayer.Dying += PlayCassieAndRemoveHintsOnDying;
             EventTargetPlayer.Died += RemoveHintOnDied;
             EventTargetPlayer.Left += RemoveDisplayNicknameOnLeft;
+            EventTargetPlayer.Handcuffing += CancelHandcuffingOnHandcuffing;
             
             EventTargetServer.RoundStarted += SpawnScp575OnRoundStarted;
 
@@ -115,6 +116,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             EventTargetPlayer.Dying -= PlayCassieAndRemoveHintsOnDying;
             EventTargetPlayer.Died -= RemoveHintOnDied;
             EventTargetPlayer.Left -= RemoveDisplayNicknameOnLeft;
+            EventTargetPlayer.Handcuffing -= CancelHandcuffingOnHandcuffing;
             
             EventTargetServer.RoundStarted -= SpawnScp575OnRoundStarted;
             
@@ -181,6 +183,20 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             });
         }
 
+        /// <summary>
+        /// Отменить связку Scp-575
+        /// </summary>
+        /// <param name="ev"></param>
+        private void CancelHandcuffingOnHandcuffing(HandcuffingEventArgs ev)
+        {
+            if (!Check(ev.Target))
+            {
+                return;
+            }
+
+            ev.IsAllowed = false;
+        }
+        
         /// <summary>
         /// Заспавнить Scp-575
         /// </summary>

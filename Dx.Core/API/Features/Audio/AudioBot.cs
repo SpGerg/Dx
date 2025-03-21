@@ -60,7 +60,5 @@ public abstract class AudioBot
 
         Npc = null;
         Base = null;
-        
-        Log.Info(Npc);
     }
 }
