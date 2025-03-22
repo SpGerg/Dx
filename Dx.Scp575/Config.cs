@@ -1,17 +1,16 @@
 using System.ComponentModel;
 using Dx.Core.API.Features;
+using Dx.Scp575.API.Features.CustomRoles;
 using Exiled.API.Enums;
 using Exiled.API.Interfaces;
 using UnityEngine;
 
-namespace Dx.NoRules.API.Features.CustomRoles.Scp575Role
+namespace Dx.Scp575
 {
-    public class Scp575Config : IConfig
+    public class Config : IConfig
     {
-        [Description("Включён или нет")]
         public bool IsEnabled { get; set; }
         
-        [Description("Дебаг или нет")]
         public bool Debug { get; set; }
         
         [Description("Кулдаун специальной способности")]

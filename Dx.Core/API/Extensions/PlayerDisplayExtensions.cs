@@ -1,7 +1,7 @@
 using HintServiceMeow.Core.Models.Hints;
 using HintServiceMeow.Core.Utilities;
 
-namespace Dx.NoRules.API.Extensions
+namespace Dx.Core.API.Extensions
 {
     public static class PlayerDisplayExtensions
     {

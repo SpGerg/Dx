@@ -3,7 +3,7 @@ using Exiled.API.Features;
 using HintServiceMeow.Core.Models.HintContent;
 using Hint = HintServiceMeow.Core.Models.Hints.Hint;
 
-namespace Dx.NoRules.API.Features.ProximityChat
+namespace Dx.ProximityChat.API.Features.ProximityChat
 {
     public class ProximityChat
     {

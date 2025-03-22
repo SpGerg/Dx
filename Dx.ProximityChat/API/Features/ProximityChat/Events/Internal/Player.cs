@@ -1,5 +1,3 @@
-using Dx.NoRules.API.Features.CustomRoles.Scp575;
-using Exiled.API.Features;
 using Exiled.API.Features.Roles;
 using Exiled.Events.EventArgs.Player;
 using HintServiceMeow.Core.Utilities;
@@ -10,7 +8,7 @@ using VoiceChat.Networking;
 using EventTarget = Exiled.Events.Handlers.Player;
 using SpectatorRole = Exiled.API.Features.Roles.SpectatorRole;
 
-namespace Dx.NoRules.API.Features.ProximityChat.Events.Internal
+namespace Dx.ProximityChat.API.Features.ProximityChat.Events.Internal
 {
     internal static class Player
     {
@@ -87,11 +85,6 @@ namespace Dx.NoRules.API.Features.ProximityChat.Events.Internal
                 return;
             }
 
-            if (Scp575Role.Instance.Check(ev.Player))
-            {
-                return;
-            }
-            
             if (!ReferenceHub.TryGetHubNetID(ev.Player.Connection.identity.netId, out var player))
             {
                 return;

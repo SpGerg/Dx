@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using Dx.Core.API.Features;
 using Dx.Core.API.Features.Audio;
-using Dx.NoRules.API.Features.CustomRoles.Scp575Role;
 using Exiled.API.Interfaces;
 using PlayerRoles;
 using UnityEngine;
@@ -51,39 +50,6 @@ namespace Dx.NoRules
         
         [Description("Время перезарядки .stalk")]
         public float StalkCooldown { get; set; } = 100;
-        
-        [Description("Войс чаты")]
-        public RoleTypeId[] ProximityChatRoles { get; set; } =
-        {
-            RoleTypeId.Scp049,
-            RoleTypeId.Scp079,
-            RoleTypeId.Scp096,
-            RoleTypeId.Scp106,
-            RoleTypeId.Scp173,
-            RoleTypeId.Scp0492,
-            RoleTypeId.Scp939
-        };
-        
-        [Description("Хинт при включении")]
-        public HintSettings VoiceEnabledHint { get; set; } = new()
-        {
-            Text = "Войс чат включён",
-            Position = new Vector2(0, 800),
-            Size = 25,
-            Duration = 3
-        };
-        
-        [Description("Хинт при выключении")]
-        public HintSettings VoiceDisabledHint { get; set; } = new()
-        {
-            Text = "Войс чат выключен",
-            Position = new Vector2(0, 800),
-            Size = 25,
-            Duration = 3
-        };
-
-        [Description("Дистанция чата")]
-        public float ProximityChatDistance { get; set; } = 15f;
 
         [Description("Настройки аудио в начале")]
         public AudioSettings[] RoundStartAudios { get; set; } =
@@ -108,9 +74,6 @@ namespace Dx.NoRules
             }
         };
 
-        [Description("Конфиг Scp-575")]
-        public Scp575Config Scp575Config { get; set; } = new();
-
         [Description("Урон снайперской винтовки")]
         public float SniperRifleDamage { get; set; } = 30;
         
@@ -125,6 +88,12 @@ namespace Dx.NoRules
         
         [Description("Бесконечные ли патроны")]
         public bool IsInfinityRadio { get; set; } = true;
+        
+        [Description("Выключать ли свет при начале раунда")]
+        public bool IsDisableLightOnRoundStarted { get; set; } = true;
+        
+        [Description("Выключать ли свет при начале раунда")]
+        public bool IsLockDoorsOnRoundStarted { get; set; } = true;
 
         [Description("Сообщение когда игрок был доспавнен")]
         public HintSettings RespawnedAfterDieHint { get; set; } = new()

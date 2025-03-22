@@ -4,11 +4,11 @@
     <PropertyGroup>
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{1FEBD499-C0FE-460E-80CD-FBFB990ECDAE}</ProjectGuid>
+        <ProjectGuid>{13A4C3BE-8E68-4845-9534-3F740FA3A9EE}</ProjectGuid>
         <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>Dx.NoRules</RootNamespace>
-        <AssemblyName>Dx.NoRules</AssemblyName>
+        <RootNamespace>Dx.Scp575</RootNamespace>
+        <AssemblyName>Dx.Scp575</AssemblyName>
         <LangVersion>9.0</LangVersion>
         <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
@@ -102,16 +102,8 @@
         <Reference Include="System.Xml" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="API\Extensions\PlayerExtensions.cs" />
-        <Compile Include="API\Features\CustomItems\SniperRifle\Hints\SniperRifleHint.cs" />
-        <Compile Include="API\Features\CustomItems\SniperRifle\SniperRifleItem.cs" />
-        <Compile Include="API\Features\ShootingEffects\Components\MovingForward.cs" />
-        <Compile Include="API\Features\ShootingEffects\Events\Internal\Player.cs" />
-        <Compile Include="Commands\User\Stalk.cs" />
-        <Compile Include="Commands\User\Take.cs" />
+        <Compile Include="API\Features\CustomRoles\Scp575Role.cs" />
         <Compile Include="Config.cs" />
-        <Compile Include="Events\Internal\Map.cs" />
-        <Compile Include="Events\Internal\Player.cs" />
         <Compile Include="Events\Internal\Server.cs" />
         <Compile Include="Plugin.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />

@@ -36,13 +36,19 @@ namespace Dx.NoRules.Events.Internal
             //Другие плагины могут блокировать до начала раунда и также их открывать, заблокируем после открытия.
             Timing.CallDelayed(Timing.WaitForOneFrame, () =>
             {
-                foreach (var door in Door.List)
+                if (Plugin.Config.IsLockDoorsOnRoundStarted)
                 {
-                    door.Lock(5f, DoorLockType.AdminCommand);
+                    foreach (var door in Door.List)
+                    {
+                        door.Lock(5f, DoorLockType.AdminCommand);
+                    }
                 }
-                
-                Exiled.API.Features.Map.TurnOffAllLights(5f);
-                
+
+                if (Plugin.Config.IsDisableLightOnRoundStarted)
+                {
+                    Exiled.API.Features.Map.TurnOffAllLights(5f);
+                }
+
                 Plugin.Config.CassieMessageAtRoundStart.Speak();
             });
             

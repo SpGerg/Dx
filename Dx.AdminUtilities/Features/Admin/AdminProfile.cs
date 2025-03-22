@@ -18,6 +18,6 @@ public class AdminProfile
     {
         var timeSpan = ModeratedTime.TimeOfDay;
         
-        return $"{Username} ({UserId}): {(int) timeSpan.TotalDays} дней, {(int) timeSpan.TotalHours} часов, {(int) timeSpan.TotalMinutes} минут";
+        return $"{Username} ({UserId}): {timeSpan.Days} дней, {timeSpan.Hours} часов, {timeSpan.Minutes} минут";
     }
 }

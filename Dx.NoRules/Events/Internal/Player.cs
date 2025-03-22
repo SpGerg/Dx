@@ -1,17 +1,13 @@
 using System;
 using System.Collections.Generic;
 using Dx.NoRules.API.Extensions;
-using Dx.NoRules.API.Features.CustomRoles.Scp575;
 using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
-using Exiled.CustomRoles.API.Features;
 using Exiled.Events.EventArgs.Player;
 using HintServiceMeow.Core.Models.HintContent;
-using HintServiceMeow.Core.Models.Hints;
 using HintServiceMeow.Core.Utilities;
-using PlayerRoles;
 using Respawning.Waves;
 using EventTarget = Exiled.Events.Handlers.Player;
 using Hint = HintServiceMeow.Core.Models.Hints.Hint;

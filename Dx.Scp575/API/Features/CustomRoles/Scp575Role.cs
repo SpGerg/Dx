@@ -1,23 +1,20 @@
 using System.Collections.Generic;
 using System.Linq;
+using Dx.Core.API.Extensions;
 using Dx.Core.API.Features;
-using Dx.NoRules.API.Extensions;
 using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Attributes;
-using Exiled.API.Features.Items;
 using Exiled.API.Features.Spawn;
 using Exiled.CustomRoles.API.Features;
 using Exiled.Events.EventArgs.Interfaces;
 using Exiled.Events.EventArgs.Map;
 using Exiled.Events.EventArgs.Player;
-using HintServiceMeow.Core.Extension;
 using HintServiceMeow.Core.Models.HintContent;
 using HintServiceMeow.Core.Utilities;
 using MEC;
 using PlayerRoles;
-using PluginAPI.Events;
 using UnityEngine;
 using VoiceChat;
 using EventTargetPlayer = Exiled.Events.Handlers.Player;
@@ -25,7 +22,7 @@ using EventTargetMap = Exiled.Events.Handlers.Map;
 using EventTargetServer = Exiled.Events.Handlers.Server;
 using Hint = HintServiceMeow.Core.Models.Hints.Hint;
 
-namespace Dx.NoRules.API.Features.CustomRoles.Scp575
+namespace Dx.Scp575.API.Features.CustomRoles
 {
     [CustomRole(RoleTypeId.Tutorial)]
     public class Scp575Role : CustomRole
@@ -62,30 +59,30 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
         {
             Instance = this;
             
-            SpawnChance = Plugin.Config.Scp575Config.SpawnChance;
+            SpawnChance = Plugin.Config.SpawnChance;
             SpawnProperties.RoomSpawnPoints.Add(new RoomSpawnPoint
             {
                 Chance = 100,
-                Offset = Plugin.Config.Scp575Config.SpawnRoomOffset,
-                Room = Plugin.Config.Scp575Config.SpawnRoom
+                Offset = Plugin.Config.SpawnRoomOffset,
+                Room = Plugin.Config.SpawnRoom
             });
 
             _targetHint = new Hint
             {
                 Id = "target-hint",
-                Content = new StringContent(Plugin.Scp575Config.DarkRoomHint.Text),
-                XCoordinate = Plugin.Scp575Config.DarkRoomHint.Position.x,
-                YCoordinate = Plugin.Scp575Config.DarkRoomHint.Position.y,
-                FontSize = Plugin.Scp575Config.DarkRoomHint.Size
+                Content = new StringContent(Plugin.Config.DarkRoomHint.Text),
+                XCoordinate = Plugin.Config.DarkRoomHint.Position.x,
+                YCoordinate = Plugin.Config.DarkRoomHint.Position.y,
+                FontSize = Plugin.Config.DarkRoomHint.Size
             };
             
             _deathOnSurfaceHint = new Hint
             {
                 Id = "death-on-surface",
-                Content = new StringContent(Plugin.Scp575Config.DeathOnSurfaceHint.Text),
-                XCoordinate = Plugin.Scp575Config.DeathOnSurfaceHint.Position.x,
-                YCoordinate = Plugin.Scp575Config.DeathOnSurfaceHint.Position.y,
-                FontSize = Plugin.Scp575Config.DeathOnSurfaceHint.Size
+                Content = new StringContent(Plugin.Config.DeathOnSurfaceHint.Text),
+                XCoordinate = Plugin.Config.DeathOnSurfaceHint.Position.x,
+                YCoordinate = Plugin.Config.DeathOnSurfaceHint.Position.y,
+                FontSize = Plugin.Config.DeathOnSurfaceHint.Size
             };
             
             EventTargetPlayer.PickingUpItem += CancelPickingUpOnPickingUp;
@@ -138,7 +135,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
 
             if (!_cooldowns.ContainsKey(player))
             {
-                _cooldowns.Add(player, new Cooldown(Plugin.Scp575Config.SpecialAbilityCooldown));  
+                _cooldowns.Add(player, new Cooldown(Plugin.Config.SpecialAbilityCooldown));  
             }
 
             Plugin.Coroutines.Start($"{player.UserId}-dark-room-coroutine", DarkRoomCoroutine(player));
@@ -161,23 +158,23 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
 
         protected override void ShowMessage(Player player)
         {
-            if (!Plugin.Scp575Config.HintOnSpawn.Enabled)
+            if (!Plugin.Config.HintOnSpawn.Enabled)
             {
                 return;
             }
             
             var hint = new Hint
             {
-                Content = new StringContent(Plugin.Scp575Config.HintOnSpawn.Text),
-                XCoordinate = Plugin.Scp575Config.HintOnSpawn.Position.x,
-                YCoordinate = Plugin.Scp575Config.HintOnSpawn.Position.y,
-                FontSize = Plugin.Scp575Config.HintOnSpawn.Size
+                Content = new StringContent(Plugin.Config.HintOnSpawn.Text),
+                XCoordinate = Plugin.Config.HintOnSpawn.Position.x,
+                YCoordinate = Plugin.Config.HintOnSpawn.Position.y,
+                FontSize = Plugin.Config.HintOnSpawn.Size
             };
 
             var playerDisplay = PlayerDisplay.Get(player);
             playerDisplay.AddHint(hint);
             
-            Plugin.Coroutines.CallDelayed(Plugin.Scp575Config.HintOnSpawn.Duration, () =>
+            Plugin.Coroutines.CallDelayed(Plugin.Config.HintOnSpawn.Duration, () =>
             {
                 playerDisplay.RemoveHint(hint);
             });
@@ -202,12 +199,12 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
         /// </summary>
         private void SpawnScp575OnRoundStarted()
         {
-            if (!Plugin.Scp575Config.IsEnabled)
+            if (!Plugin.Config.IsEnabled)
             {
                 return;
             }
             
-            if (Player.Get(RoleTypeId.Scp106).Any() || Player.List.Count < Plugin.Scp575Config.MinimumPlayersToSpawn)
+            if (Player.Get(RoleTypeId.Scp106).Any() || Player.List.Count < Plugin.Config.MinimumPlayersToSpawn)
             {
                 return;
             }
@@ -215,9 +212,9 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             var target = Player.Get(RoleTypeId.ClassD).GetRandomValue();
             Instance.AddRole(target);
             
-            Plugin.Coroutines.CallDelayed(Plugin.Scp575Config.CassieOnSpawnDelay, () =>
+            Plugin.Coroutines.CallDelayed(Plugin.Config.CassieOnSpawnDelay, () =>
             {
-                Plugin.Scp575Config.CassieOnSpawn.Speak();
+                Plugin.Config.CassieOnSpawn.Speak();
             });
         }
 
@@ -241,7 +238,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
                 }
             }
 
-            Plugin.Scp575Config.CassieOnDeath.Speak();
+            Plugin.Config.CassieOnDeath.Speak();
         }
 
         /// <summary>
@@ -314,7 +311,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
                     continue;
                 }
                 
-                player.Hurt(Plugin.Scp575Config.FlashlightDamage, DamageType.Custom);
+                player.Hurt(Plugin.Config.FlashlightDamage, DamageType.Custom);
             }
         }
         
@@ -350,7 +347,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
 
             if (!_cooldowns.TryGetValue(ev.Player, out var cooldown))
             {
-                _cooldowns.Add(ev.Player, cooldown = new Cooldown(Plugin.Scp575Config.SpecialAbilityCooldown));
+                _cooldowns.Add(ev.Player, cooldown = new Cooldown(Plugin.Config.SpecialAbilityCooldown));
             }
 
             if (!cooldown.IsReady)
@@ -361,7 +358,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
 
                 if (hint is not null)
                 {
-                    hint.Text = Plugin.Scp575Config.SpecialAbilityIsNotReadyHint.Text.Replace("%cooldown%",
+                    hint.Text = Plugin.Config.SpecialAbilityIsNotReadyHint.Text.Replace("%cooldown%",
                         ((int) cooldown.RemainingTime).ToString());
                     
                     return;
@@ -370,15 +367,15 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
                 hint = new Hint
                 {
                     Id = _cooldownHintId,
-                    Content = new StringContent(Plugin.Scp575Config.SpecialAbilityIsNotReadyHint.Text.Replace("%cooldown%", ((int) cooldown.RemainingTime).ToString())),
-                    XCoordinate = Plugin.Scp575Config.SpecialAbilityIsNotReadyHint.Position.x,
-                    YCoordinate = Plugin.Scp575Config.SpecialAbilityIsNotReadyHint.Position.y,
-                    FontSize = Plugin.Scp575Config.SpecialAbilityIsNotReadyHint.Size
+                    Content = new StringContent(Plugin.Config.SpecialAbilityIsNotReadyHint.Text.Replace("%cooldown%", ((int) cooldown.RemainingTime).ToString())),
+                    XCoordinate = Plugin.Config.SpecialAbilityIsNotReadyHint.Position.x,
+                    YCoordinate = Plugin.Config.SpecialAbilityIsNotReadyHint.Position.y,
+                    FontSize = Plugin.Config.SpecialAbilityIsNotReadyHint.Size
                 };
 
                 playerDisplay.AddHint(hint);
 
-                Plugin.Coroutines.CallDelayed(Plugin.Scp575Config.SpecialAbilityIsNotReadyHint.Duration, () =>
+                Plugin.Coroutines.CallDelayed(Plugin.Config.SpecialAbilityIsNotReadyHint.Duration, () =>
                 {
                     playerDisplay.RemoveHint(hint);
                 });
@@ -389,7 +386,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
             foreach (var door in ev.Player.CurrentRoom.Doors)
             {
                 door.IsOpen = false;
-                door.Lock(Plugin.Scp575Config.SpecialAbilityDoorLockTime, DoorLockType.AdminCommand);
+                door.Lock(Plugin.Config.SpecialAbilityDoorLockTime, DoorLockType.AdminCommand);
             }
 
             cooldown.ForceUse();
@@ -463,7 +460,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
         {
             var targetRoom = player.CurrentRoom;
 
-            var damage = Plugin.Scp575Config.DarkRoomDamage;
+            var damage = Plugin.Config.DarkRoomDamage;
 
             var lastPlayers = targetRoom.Players;
 
@@ -488,7 +485,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
                     }
                     else
                     {
-                        damage = Plugin.Scp575Config.DarkRoomDamage;
+                        damage = Plugin.Config.DarkRoomDamage;
                     }
 
                     var merged = new List<Player>(player.CurrentRoom.Players.Count() + lastPlayers.Count());
@@ -582,7 +579,7 @@ namespace Dx.NoRules.API.Features.CustomRoles.Scp575
                     break;
                 }
                 
-                player.Hurt(Plugin.Scp575Config.DamagePerSecondOnSurface, DamageType.Custom);
+                player.Hurt(Plugin.Config.DamagePerSecondOnSurface, DamageType.Custom);
 
                 yield return Timing.WaitForSeconds(1);
             }

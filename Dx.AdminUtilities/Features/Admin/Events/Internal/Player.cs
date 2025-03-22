@@ -44,7 +44,7 @@ internal static class Player
 
     private static void AddModeratedTimeOnLeft(LeftEventArgs ev)
     {
-        if (!ev.Player.IsAdministrator())
+        if (ev.Player.UserId is null || !ev.Player.IsAdministrator())
         {
             return;
         }
