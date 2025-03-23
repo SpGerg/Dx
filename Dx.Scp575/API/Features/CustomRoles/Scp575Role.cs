@@ -127,9 +127,6 @@ namespace Dx.Scp575.API.Features.CustomRoles
         {
             Timing.CallDelayed(0.75f, () =>
             {
-                player.ChangeAppearance(RoleTypeId.Scp106);
-                player.VoiceChannel = VoiceChatChannel.ScpChat;
-
                 player.DisplayNickname = "Scp-575";
             });
 
