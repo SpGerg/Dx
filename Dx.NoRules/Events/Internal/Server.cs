@@ -40,7 +40,7 @@ namespace Dx.NoRules.Events.Internal
                 {
                     foreach (var door in Door.List)
                     {
-                        door.Lock(5f, DoorLockType.AdminCommand);
+                        door.Lock(Plugin.Config.DoorLockTimeOnRoundStarted, DoorLockType.AdminCommand);
                     }
                 }
 

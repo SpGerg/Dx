@@ -94,6 +94,9 @@ namespace Dx.NoRules
         
         [Description("Выключать ли свет при начале раунда")]
         public bool IsLockDoorsOnRoundStarted { get; set; } = true;
+        
+        [Description("Насколько блокировать двери при начале раунда")]
+        public float DoorLockTimeOnRoundStarted { get; set; } = 5;
 
         [Description("Сообщение когда игрок был доспавнен")]
         public HintSettings RespawnedAfterDieHint { get; set; } = new()
