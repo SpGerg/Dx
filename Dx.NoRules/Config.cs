@@ -98,6 +98,9 @@ namespace Dx.NoRules
         [Description("Насколько блокировать двери при начале раунда")]
         public float DoorLockTimeOnRoundStarted { get; set; } = 5;
 
+        [Description("Разрушаемые ли")]
+        public bool IsDestroyableDoors { get; set; } = true;
+
         [Description("Сообщение когда игрок был доспавнен")]
         public HintSettings RespawnedAfterDieHint { get; set; } = new()
         {

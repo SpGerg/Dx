@@ -14,6 +14,8 @@ namespace Dx.NoRules.Events.Internal
 {
     internal static class Server
     {
+        private const float MaxDoorHealth = 150f;
+        
         public static void Register()
         {
             EventTarget.RoundStarted += BlockDoorsAndOffLightOnRoundStarted;
@@ -26,6 +28,26 @@ namespace Dx.NoRules.Events.Internal
             EventTarget.RoundStarted -= BlockDoorsAndOffLightOnRoundStarted;
             EventTarget.WaitingForPlayers -= ClearCoroutinesOnWaitingForPlayers;
             EventTarget.RespawnedTeam -= SetLastSpawnedWaveOnSpawned;
+        }
+
+        /// <summary>
+        /// Установить здоровье дверям
+        /// (DX)
+        /// </summary>
+        private static void SetDoorsHealthsOnRoundStarted()
+        {
+            Player.DoorHealth.Clear();
+
+            foreach (var door in Door.List)
+            {
+                // Игнорируем двери, для которых нужна ключ-карта
+                if (!door.IsKeycardDoor)
+                {
+                    continue;
+                }
+                
+                Player.DoorHealth[door] = MaxDoorHealth;
+            }
         }
 
         /// <summary>

@@ -4,11 +4,13 @@ using Dx.NoRules.API.Extensions;
 using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
+using Exiled.API.Features.Doors;
 using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Player;
 using HintServiceMeow.Core.Models.HintContent;
 using HintServiceMeow.Core.Utilities;
 using Respawning.Waves;
+using UnityEngine;
 using EventTarget = Exiled.Events.Handlers.Player;
 using Hint = HintServiceMeow.Core.Models.Hints.Hint;
 using KeycardPermissions = Interactables.Interobjects.DoorUtils.KeycardPermissions;
@@ -18,6 +20,8 @@ namespace Dx.NoRules.Events.Internal
     internal static class Player
     {
         private static readonly Dictionary<string, DateTime> Times = new();
+        
+        internal static readonly Dictionary<Door, float> DoorHealth = new();
 
         public static void Register()
         {
@@ -31,6 +35,7 @@ namespace Dx.NoRules.Events.Internal
             EventTarget.InteractingLocker += OpenLockerIfHasPermissionOnInteractingLocker;
             EventTarget.UnlockingGenerator += OpenGeneratorIfHasPermissionOnUnlockingGenerator;
             EventTarget.DroppingAmmo += CancelDropAmmoOnDroppingAmmo;
+            EventTarget.Shooting += TakeDamageOnShooting;
         }
         
         public static void Unregister()
@@ -45,6 +50,48 @@ namespace Dx.NoRules.Events.Internal
             EventTarget.InteractingLocker -= OpenLockerIfHasPermissionOnInteractingLocker;
             EventTarget.UnlockingGenerator -= OpenGeneratorIfHasPermissionOnUnlockingGenerator;
             EventTarget.DroppingAmmo -= CancelDropAmmoOnDroppingAmmo;
+            EventTarget.Shooting -= TakeDamageOnShooting;
+        }
+        
+        /// <summary>
+        /// Наносить урон двери при стрельбе
+        /// (DX)
+        /// </summary>
+        /// <param name="ev"></param>
+        private static void TakeDamageOnShooting(ShootingEventArgs ev)
+        {
+            if (!Plugin.Config.IsDestroyableDoors)
+            {
+                return;
+            }
+            
+            var ray = new Ray(ev.Player.CameraTransform.position, ev.Player.CameraTransform.forward);
+
+            if (!Physics.Raycast(ray, out var hit, 100f))
+            {
+                return;
+            }
+            
+            var door = Door.Get(hit.transform.root.gameObject);
+
+            if (door == null || !DoorHealth.ContainsKey(door))
+            {
+                return;
+            }
+            
+            var damage = ev.Firearm.Damage;
+            DoorHealth[door] -= damage;
+
+            ev.Player.ShowHitMarker();
+
+            if (!(DoorHealth[door] <= 0))
+            {
+                return;
+            }
+            
+            door.IsOpen = true;
+            door.Lock(float.MaxValue, Exiled.API.Enums.DoorLockType.AdminCommand);
+            DoorHealth.Remove(door);
         }
 
         /// <summary>
